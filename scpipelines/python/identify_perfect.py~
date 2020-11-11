@@ -36,17 +36,6 @@ print(args)
 # ######################## Import whitelist    ############################## #
 # ########################################################################### #
 
-whitelist = iotools.open_file(args.whitelist, "r")
-barcodes = []
-
-for line in whitelist:
-    barcodes.append(line.split("\t")[0])
-
-
-# ########################################################################### #
-# ######################## Apply Levenstein distance ######################## #
-# ########################################################################### #
-
 outf = iotools.open_file(paste0(args.outname,".fastq.1.gz"),"w")
 outf2 = iotools.open_file(paste0(args.outname,".fastq.2.gz"),"w")
 

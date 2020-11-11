@@ -2,7 +2,6 @@ import sys
 import regex
 import cgatcore.iotools as iotools
 import pysam
-import Levenshtein
 import logging
 import argparse
 
@@ -36,44 +35,52 @@ print(args)
 # ######################## Import whitelist    ############################## #
 # ########################################################################### #
 
-whitelist = iotools.open_file(args.whitelist, "r")
-barcodes = []
 
-for line in whitelist:
-    barcodes.append(line.split("\t")[0])
-
-
-# ########################################################################### #
-# ######################## Apply Levenstein distance ######################## #
-# ########################################################################### #
-
-outf = iotools.open_file(paste0(args.outname,".fastq.1.gz"),"w")
-outf2 = iotools.open_file(paste0(args.outname,".fastq.2.gz"),"w")
-
-
-with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
-    
+def perfect_barcode_umi(string):
+    i = 0
     n = 0
-    y = 0
-    for record_fh, record_fh2  in zip(fh, fh2):
-        barcode = record_fh.sequence[0:24]
+    umis = []
+    for x in range(0, len(string)):
+        
 
-        y += 1
-
-        for b in barcodes:
-
-            
-
-            if Levenshtein.distance(barcode, b) <= 2:
-                n +=1
-                b = b + record_fh.sequence[24:]
-
-                outf.write("@%s\n%s\n+\n%s\n" % (record_fh.name, b, record_fh.quality))
-                outf2.write("@%s\n%s\n+\n%s\n" % (record_fh2.name, record_fh2.sequence, record_fh2.quality))
-                break
-                
+        substr = string[x:x+2]
+        if i % 2:
+            pass
+        else:
+            if ("CC" in substr or "GG" in substr or "AA" in substr or "TT" in substr):
+                n+=1
+                if n == len(string)/2:
+                    umi = string[::2]
+                    return(umi)
             else:
-                pass
+                break
+        i +=1
+
+
+
+read1 = iotools.open_file(paste0(args.outname,".fastq.1.gz"),"w")
+read2 = iotools.open_file(paste0(args.outname,".fastq.2.gz"),"w")
+
+
+
+perfect = 0
+total = 0
+with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
+    for record_fh, record_fh2  in zip(fh, fh2):
+
+        total += 1
+        barcode_umi = perfect_barcode_umi(record_fh.sequence)
+        if barcode_umi:
+            perfect += 1
+            read1.write("@%s\n%s\n+\n%s\n" % (record_fh.name, barcode_umi, record_fh.quality[20:]))
+            read2.write("@%s\n%s\n+\n%s\n" % (record_fh2.name, record_fh2.sequence, record_fh2.quality))
+        else:
+            pass
+
+L.info("Number of perfect read pairs:")
+L.info(perfect)
+L.info("Total number of read pairs:")
+L.info(total)
 
 outf.close()
 outf2.close()
