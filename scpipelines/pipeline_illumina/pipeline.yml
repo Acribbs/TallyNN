@@ -25,3 +25,14 @@ version: 0.1
 release: 0.1
 
 data: data.dir
+
+
+# Number of reads to split the fastq file by for parallelization
+# Needs to be a multiple of 4
+split: 40000000
+
+# Levenshtein distance
+distance: 3
+
+# Numbers of cells for whitelist
+whitelist: 2000

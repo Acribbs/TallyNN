@@ -104,9 +104,9 @@ def split_fastq_perfect(infile, outfiles):
     infile = "".join(infile)
     second_read = infile.replace(".fastq.1.gz", ".fastq.2.gz")
 
-    statement = '''zcat %(infile)s | split -l 200000 - read1. &&
-                   zcat %(second_read)s | split -l 200000 - read2. &&
-                   mv *read* split_tmp.dir/'''
+    statement = '''zcat %(infile)s | split -l %(split)s - read1. &&
+                   zcat %(second_read)s | split -l %(split)s - read2. &&
+                   mv read*.* split_tmp.dir/'''
 
     P.run(statement)
 
@@ -126,28 +126,29 @@ def perfect_reads(infile, outfiles):
 
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
-    statement = '''python %(PYTHON_ROOT)sidentify_perfect.py --read1=%(read1)s --read2=%(read2)s --outname=%(name)s &&
-                   sleep 30 &&
-                   mv *fastq* perfect_reads_split.dir &&
-                   sleep 30'''
+    statement = '''python %(PYTHON_ROOT)sidentify_perfect.py --read1=%(read1)s --read2=%(read2)s --outname=%(name)s'''
 
     P.run(statement)
 
 
-@merge(perfect_reads, "whitelist.fastq.1.gz")
+@merge(perfect_reads, "perfect.fastq.1.gz")
 def merge_fastq_perfect(infiles, outfile):
     '''merge read1 of fastq in perparation for running umi-tools whitelist'''
 
     infile = []
+    infile2 = []
 
     for i in infiles:
-        print(i[0])
+        infile2.append(i[0].replace(".fastq.1.gz",".fastq.2.gz"))
         infile.append(str(i[0]))
 
+    outfile2 = outfile.replace(".fastq.1.gz",".fastq.2.gz")
 
     infiles = " ".join(infile)
+    infiles2 = " ".join(infile2)
 
-    statement = '''cat %(infiles)s > %(outfile)s'''
+    statement = '''cat %(infiles)s > %(outfile)s &&
+                   cat %(infiles2)s > %(outfile2)s'''
 
     P.run(statement)
 
@@ -158,26 +159,78 @@ def merge_fastq_perfect(infiles, outfile):
 def whitelist(infile, outfile):
     ''' '''
 
+    cell_num = PARAMS['whitelist']
     statement = '''umi_tools whitelist --stdin=%(infile)s --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN
-                   --set-cell-number=10000 -L extract.log > %(outfile)s
+                   --set-cell-number=%(cell_num)s -L extract.log > %(outfile)s
  '''
 
     P.run(statement)
 
 
-@folles(mkdir("corrected_reads.dir"))
+@follows(mkdir("corrected_reads.dir"))
 @transform(perfect_reads,
-           regex("perfect_reads_split.dir/"),
-           r"corrected_reads.dir/")
-def correct_reads(ifile, outfile):
+           regex("perfect_reads_split.dir/(\S+)_perfect.fastq.1.gz"),
+           add_inputs(whitelist),
+           r"corrected_reads.dir/\1_corrected.fastq.1.gz")
+def correct_reads(infiles, outfile):
     '''Correct barcodes that are from the error files '''
 
-    statement = ''' '''
+    infile1, infile2 = infiles
+
+    read1 = infile1[1].replace("_perfect.fastq.1.gz","_error.fastq.1.gz")
+    read2 = infile1[0].replace("_perfect.fastq.1.gz","_error.fastq.2.gz")
+
+    name = infile1[0].replace("_perfect.fastq.1.gz","")
+    name = name.replace("perfect_reads_split.dir/","")
+
+    distance = PARAMS['distance']
+
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+    statement = '''python %(PYTHON_ROOT)s/correct_barcode.py --whitelist=%(infile2)s --read1=%(read1)s --read2=%(read2)s --outname=%(name)s --distance=%(distance)s'''
 
     P.run(statement)
 
 
-@follows()
+@merge(correct_reads, "corrected.fastq.1.gz")
+def merge_corrected(infiles, outfile):
+    '''merge the corrected reads '''
+
+    infile = []
+    infile2 = []
+
+    for i in infiles:
+        infile2.append(i[0].replace(".fastq.1.gz",".fastq.2.gz"))
+        infile.append(str(i[0]))
+ 
+    infiles = " ".join(infile)
+    infiles2 = " ".join(infile2)
+
+    outfile2 = outfile.replace(".fastq.1.gz",".fastq.2.gz")
+
+    statement = '''cat %(infiles)s > %(outfile)s &&
+                   cat %(infiles2)s > %(outfile2)s'''
+
+    P.run(statement)
+
+
+@transform(merge_corrected,
+           suffix(".fastq.1.gz"),
+           add_inputs(merge_fastq_perfect),
+           r"final")
+def combine_perfect_corrected(infiles, outfile):
+    '''Combine the the perfect and the corrected reads together'''
+
+    infile_1_R1, infile_2_R1 = infiles
+
+    infile_1_R2 = infile_1_R1.replace(".fastq.1.gz",".fastq.2.gz") 
+    infile_2_R2 = infile_2_R1.replace(".fastq.1.gz",".fastq.2.gz")
+
+    statement = '''cat %(infile_1_R1)s %(infile_2_R1)s > final.fastq.1.gz &&
+                  cat %(infile_1_R2)s %(infile_2_R2)s > final.fastq.2.gz '''
+
+    P.run(statement)
+
+@follows(combine_perfect_corrected)
 def full():
     pass
 

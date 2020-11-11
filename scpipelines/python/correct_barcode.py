@@ -27,6 +27,9 @@ parser.add_argument("--read2", default=None, type=str,
                     help='read2 fastq file')
 parser.add_argument("--outname", default=None, type=str,
                     help='name for output fastq files')
+parser.add_argument("--distance", default=None, type=str,
+                    help='levenshtein distance')
+
 args = parser.parse_args()
 
 L.info("args:")
@@ -47,8 +50,8 @@ for line in whitelist:
 # ######################## Apply Levenstein distance ######################## #
 # ########################################################################### #
 
-outf = iotools.open_file(paste0(args.outname,".fastq.1.gz"),"w")
-outf2 = iotools.open_file(paste0(args.outname,".fastq.2.gz"),"w")
+outf = iotools.open_file("corrected_reads.dir/" + args.outname + "_corrected.fastq.1.gz","w")
+outf2 = iotools.open_file("corrected_reads.dir/" + args.outname + "_corrected.fastq.2.gz","w")
 
 
 with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
@@ -64,7 +67,7 @@ with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
 
             
 
-            if Levenshtein.distance(barcode, b) <= 2:
+            if Levenshtein.distance(barcode, b) <= int(args.distance):
                 n +=1
                 b = b + record_fh.sequence[24:]
 
