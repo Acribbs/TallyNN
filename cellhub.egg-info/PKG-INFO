@@ -1,0 +1,22 @@
+Metadata-Version: 1.1
+Name: cellhub
+Version: 0.0.1
+Summary: cellhub : COMBATOxford single-cell pipelines
+Home-page: UNKNOWN
+Author: COMBATOxford
+Author-email: adam.cribbs@ndorms.ox.ac.uk
+License: MIT
+Description: cellhub : single cell pipelines for processing
+            COMBAT single-cell data
+Keywords: computational genomics
+Platform: any
+Classifier: Development Status :: 3 - Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development
+Classifier: Topic :: Scientific/Engineering
+Classifier: Operating System :: POSIX
+Classifier: Operating System :: Unix
+Classifier: Operating System :: MacOS
