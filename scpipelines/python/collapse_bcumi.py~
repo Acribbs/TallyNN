@@ -10,7 +10,7 @@ import argparse
 # ########################################################################### #
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-L = logging.getLogger("identify_perfect.py")
+L = logging.getLogger("extract_cells_from_loom.py")
 
 
 # ########################################################################### #
@@ -18,6 +18,8 @@ L = logging.getLogger("identify_perfect.py")
 # ########################################################################### #
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--whitelist", default=None, type=str,
+                    help='a file barcodes extracted using umi whitelist')
 parser.add_argument("--read1", default=None, type=str,
                     help='read1 fastq  file')
 parser.add_argument("--read2", default=None, type=str,
@@ -56,10 +58,10 @@ def perfect_barcode_umi(string):
 
 
 
-read1 = iotools.open_file(args.outname + "_perfect.fastq.1.gz","w")
-read2 = iotools.open_file(args.outname + "_perfect.fastq.2.gz","w")
-read1_no = iotools.open_file(args.outname + "_error.fastq.1.gz","w")
-read2_no = iotools.open_file(args.outname + "_error.fastq.2.gz","w")
+read1 = iotools.open_file(paste0(args.outname,"_perfect.fastq.1.gz"),"w")
+read2 = iotools.open_file(paste0(args.outname,"_perfect.fastq.2.gz"),"w")
+read1_no = iotools.open_file(paste0(args.outname,"_error.fastq.1.gz"),"w")
+read2_no = iotools.open_file(paste0(args.outname,"_error.fastq.2.gz"),"w")
 
 
 
@@ -67,12 +69,12 @@ perfect = 0
 total = 0
 with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
     for record_fh, record_fh2  in zip(fh, fh2):
-        total+=1
+
         barcode = perfect_barcode_umi(record_fh.sequence[:24])
-        print(barcode)
 
         if barcode:
-            perfect += 1
+            
+            barcodes.append(record_fh.sequence[:24])
             read1.write("@%s\n%s\n+\n%s\n" % (record_fh.name, record_fh.sequence, record_fh.quality))
             read2.write("@%s\n%s\n+\n%s\n" % (record_fh2.name, record_fh2.sequence, record_fh2.quality))
         else:
