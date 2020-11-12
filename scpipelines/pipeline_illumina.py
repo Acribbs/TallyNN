@@ -214,9 +214,9 @@ def merge_corrected(infiles, outfile):
 
 
 @transform(merge_corrected,
-           suffix(".fastq.1.gz"),
+           regex("(\S+).fastq.1.gz"),
            add_inputs(merge_fastq_perfect),
-           r"final")
+           r"merged.fastq.1.gz")
 def combine_perfect_corrected(infiles, outfile):
     '''Combine the the perfect and the corrected reads together'''
 
@@ -225,10 +225,25 @@ def combine_perfect_corrected(infiles, outfile):
     infile_1_R2 = infile_1_R1.replace(".fastq.1.gz",".fastq.2.gz") 
     infile_2_R2 = infile_2_R1.replace(".fastq.1.gz",".fastq.2.gz")
 
-    statement = '''cat %(infile_1_R1)s %(infile_2_R1)s > final.fastq.1.gz &&
-                  cat %(infile_1_R2)s %(infile_2_R2)s > final.fastq.2.gz '''
+    statement = '''cat %(infile_1_R1)s %(infile_2_R1)s > merged.fastq.1.gz &&
+                  cat %(infile_1_R2)s %(infile_2_R2)s > merged.fastq.2.gz '''
 
     P.run(statement)
+
+
+@transform(combine_perfect_corrected,
+           regex("(\S+).fastq.1.gz"),
+           r"final.fastq.1.gz")
+def reads_toillumina(infile, outfile):
+    ''' '''
+    infile2 = infile.replace(".fastq.1.gz", ".fastq.2.gz")
+    name = outfile.replace(".fastq.1.gz", "")
+
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+    statement = '''python %(PYTHON_ROOT)s/collapse_bcumi.py --read1=%(infile)s --read2=%(infile2)s --outname=name'''
+
+    P.run(statement)
+
 
 @follows(combine_perfect_corrected)
 def full():

@@ -34,8 +34,8 @@ print(args)
 # ########################################################################### #
 
 
-outf = iotools.open_file(paste0(args.outname,".fastq.1.gz"),"w")
-outf2 = iotools.open_file(paste0(args.outname,".fastq.2.gz"),"w")
+outf = iotools.open_file(args.outname + ".fastq.1.gz","w")
+outf2 = iotools.open_file(args.outname + ".fastq.2.gz","w")
 
 
 with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
