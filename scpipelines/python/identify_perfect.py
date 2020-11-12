@@ -69,7 +69,6 @@ with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
     for record_fh, record_fh2  in zip(fh, fh2):
         total+=1
         barcode = perfect_barcode_umi(record_fh.sequence[:24])
-        print(barcode)
 
         if barcode:
             perfect += 1

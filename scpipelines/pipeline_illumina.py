@@ -199,8 +199,8 @@ def merge_corrected(infiles, outfile):
     infile2 = []
 
     for i in infiles:
-        infile2.append(i[0].replace(".fastq.1.gz",".fastq.2.gz"))
-        infile.append(str(i[0]))
+        infile2.append(i.replace(".fastq.1.gz",".fastq.2.gz"))
+        infile.append(str(i))
  
     infiles = " ".join(infile)
     infiles2 = " ".join(infile2)
