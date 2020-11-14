@@ -155,13 +155,13 @@ def merge_fastq_perfect(infiles, outfile):
 @follows(mkdir("whitelist.dir"))
 @transform(merge_fastq_perfect,
            regex("(\S+).fastq.1.gz"),
-           r"whitelist.dir/\1.txt")
+           r"whitelist.dir/whitelist.txt")
 def whitelist(infile, outfile):
     ''' '''
 
     cell_num = PARAMS['whitelist']
     statement = '''umi_tools whitelist --stdin=%(infile)s --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN
-                   --set-cell-number=%(cell_num)s -L extract.log > %(outfile)s
+                   --set-cell-number=%(cell_num)s -L extract.log > whitelist.dir/whitelist.txt
  '''
 
     P.run(statement)
@@ -213,10 +213,53 @@ def merge_corrected(infiles, outfile):
     P.run(statement)
 
 
+@follows(mkdir("collapsed_reads.dir"))
+@transform(perfect_reads,
+           regex("perfect_reads_split.dir/(\S+)_perfect.fastq.1.gz"),
+           r"collapsed_reads.dir/\1_corrected.fastq.1.gz")
+def reads_toillumina(infiles, outfile):
+    ''' '''
+
+    infile1, infile2 = infiles
+
+    read1 = infile1.replace(".fastq.1.gz",".fastq.2.gz")
+    read2 = infile1.replace(".fastq.1.gz",".fastq.2.gz")
+
+
+    name = outfile.replace(".fastq.1.gz", "")
+
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+    statement = '''python %(PYTHON_ROOT)s/collapse_bcumi.py --read1=%(read1)s --read2=%(read2)s --outname=%(name)s'''
+
+    P.run(statement)
+
+
+@merge(reads_toillumina, "perfect_collapsed.fastq.1.gz")
+def merge_fastq_perfect_collapsed(infiles, outfile):
+    '''merge read1 of fastq in perparation for running umi-tools whitelist'''
+
+    infile = []
+    infile2 = []
+
+    for i in infiles:
+        infile2.append(i.replace(".fastq.1.gz",".fastq.2.gz"))
+        infile.append(str(i))
+
+    outfile2 = outfile.replace(".fastq.1.gz",".fastq.2.gz")
+
+    infiles = " ".join(infile)
+    infiles2 = " ".join(infile2)
+
+    statement = '''cat %(infiles)s > %(outfile)s &&
+                   cat %(infiles2)s > %(outfile2)s'''
+
+    P.run(statement)
+
+
 @transform(merge_corrected,
            regex("(\S+).fastq.1.gz"),
-           add_inputs(merge_fastq_perfect),
-           r"merged.fastq.1.gz")
+           add_inputs(merge_fastq_perfect_collapsed),
+           r"final.fastq.1.gz")
 def combine_perfect_corrected(infiles, outfile):
     '''Combine the the perfect and the corrected reads together'''
 
@@ -225,25 +268,10 @@ def combine_perfect_corrected(infiles, outfile):
     infile_1_R2 = infile_1_R1.replace(".fastq.1.gz",".fastq.2.gz") 
     infile_2_R2 = infile_2_R1.replace(".fastq.1.gz",".fastq.2.gz")
 
-    statement = '''cat %(infile_1_R1)s %(infile_2_R1)s > merged.fastq.1.gz &&
-                  cat %(infile_1_R2)s %(infile_2_R2)s > merged.fastq.2.gz '''
+    statement = '''cat %(infile_1_R1)s %(infile_2_R1)s > final.fastq.1.gz &&
+                  cat %(infile_1_R2)s %(infile_2_R2)s > final.fastq.2.gz '''
 
     P.run(statement)
-
-
-@transform(combine_perfect_corrected,
-           regex("(\S+).fastq.1.gz"),
-           r"final.fastq.1.gz")
-def reads_toillumina(infile, outfile):
-    ''' '''
-    infile2 = infile.replace(".fastq.1.gz", ".fastq.2.gz")
-    name = outfile.replace(".fastq.1.gz", "")
-
-    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
-    statement = '''python %(PYTHON_ROOT)s/collapse_bcumi.py --read1=%(infile)s --read2=%(infile2)s --outname=name'''
-
-    P.run(statement)
-
 
 @follows(combine_perfect_corrected)
 def full():

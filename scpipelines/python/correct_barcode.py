@@ -71,7 +71,7 @@ with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
                 n +=1
                 b = b + record_fh.sequence[24:]
 
-                outf.write("@%s\n%s\n+\n%s\n" % (record_fh.name, b, record_fh.quality))
+                outf.write("@%s\n%s\n+\n%s\n" % (record_fh.name, b[::2], record_fh.quality[::2]))
                 outf2.write("@%s\n%s\n+\n%s\n" % (record_fh2.name, record_fh2.sequence, record_fh2.quality))
                 break
                 
