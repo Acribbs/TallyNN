@@ -52,7 +52,7 @@ for line in whitelist:
 
 outf = iotools.open_file("corrected_reads.dir/" + args.outname + "_corrected.fastq.1.gz","w")
 outf2 = iotools.open_file("corrected_reads.dir/" + args.outname + "_corrected.fastq.2.gz","w")
-
+log =  iotools.open_file("corrected_reads.dir/" + args.outname + ".log","w")
 
 with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
     
@@ -78,6 +78,11 @@ with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
             else:
                 pass
 
+log.write("The number of total reads is: %s\n" %(y))
+log.write("The number of total recovered reads is: %s\n" %(n))
+log.write("The number of total recovered percent is: %s\n" %((n/y)*100))
+
+log.close()
 outf.close()
 outf2.close()
 whitelist.close()
