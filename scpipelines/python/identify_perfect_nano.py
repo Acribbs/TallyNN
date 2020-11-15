@@ -37,8 +37,7 @@ print(args)
 
 
 
-outfile = open(args.outname + ".fastq.gz", "w")
-log =  iotools.open_file(args.outname + "perfect_nano" + ".log","w")
+log =  iotools.open_file(args.outname + "_perfect_nano" + ".log","w")
 
 
 
@@ -49,11 +48,11 @@ def count_pairs(s):
         pairs_cnt += s.count(char + char)
     return pairs_cnt
 
-read1 = iotools.open_file(args.outname + "unambiguous_barcode_R1.fastq.gz","w")
-read2 = iotools.open_file(args.outname + "unambiguous_barcode_R2.fastq.gz","w")
+read1 = iotools.open_file(args.outname + "_unambiguous_barcode_R1.fastq","w")
+read2 = iotools.open_file(args.outname + "_unambiguous_barcode_R2.fastq","w")
 
-read1_no = iotools.open_file(args.outname + "ambiguous_barcode_R1.fastq.gz","w")
-read2_no = iotools.open_file(args.outname + "ambiguous_barcode_R2.fastq.gz","w")
+read1_no = iotools.open_file(args.outname + "_ambiguous_barcode_R1.fastq","w")
+read2_no = iotools.open_file(args.outname + "_ambiguous_barcode_R2.fastq","w")
 
 
 # generate set of barcodes for whitelist
@@ -88,10 +87,10 @@ with pysam.FastxFile(args.infile) as fh:
             barcode_umi_quality = barcode_quality + umi_quality
 
             if count_pairs(barcode) == 8:
-                barcode_umi = barcode[::2] + umi
-                barcodes.append(barcode[::2])
+                barcode_umi = barcode + umi
+                barcodes.append(barcode)
                 
-                barcode_umi_quality = barcode_quality[::2] + umi_quality
+                barcode_umi_quality = barcode_quality + umi_quality
 
                 
                 read1.write("@%s\n%s\n+\n%s\n" % (record.name, barcode_umi, barcode_umi_quality))
@@ -119,6 +118,6 @@ read1_no.close()
 read2_no.close()
 
 
-log.write("The number of barcodes identified is: %s\n" %(y))
+log.write("The number of unambiguous barcodes identified is: %s\n" %(y))
 
 log.close()

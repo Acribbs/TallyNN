@@ -42,7 +42,7 @@ def reverse_complement_table(seq):
     return seq.translate(tab)[::-1]
 
 
-outfile = open(args.outname + ".fastq.gz", "w")
+outfile = open(args.outname, "w")
 log =  iotools.open_file(args.outname + ".log","w")
 n = 0
 y = 0
@@ -67,7 +67,7 @@ with pysam.FastxFile(args.infile) as fh:
 
 log.write("The number of total reads with polyA: %s\n" %(n))
 log.write("The number of total reads is: %s\n" %(y))
-log.write("The number of total recovered percent is: %s\n" %((y/n)*100))
+log.write("The number of total recovered percent is: %s\n" %((n/y)*100))
 
 log.close()
 outfile.close()
