@@ -1,0 +1,124 @@
+import sys
+import regex
+import cgatcore.iotools as iotools
+import pysam
+import logging
+import argparse
+
+
+# ########################################################################### #
+# ###################### Set up the logging ################################# #
+# ########################################################################### #
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+L = logging.getLogger("identify_perfect_nano.py")
+
+
+# ########################################################################### #
+# ######################## Parse the arguments ############################## #
+# ########################################################################### #
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--whitelist", default=None, type=str,
+                    help='a file naming the outfile for the whitelist of barcodes.')
+parser.add_argument("--infile", default=None, type=str,
+                    help='nanopore infile fastq  file')
+parser.add_argument("--outname", default=None, type=str,
+                    help='name for output fastq files')
+
+args = parser.parse_args()
+
+L.info("args:")
+print(args)
+
+# ########################################################################### #
+# ######################## Code                ############################## #
+# ########################################################################### #
+
+
+
+outfile = open(args.outname + ".fastq.gz", "w")
+log =  iotools.open_file(args.outname + "perfect_nano" + ".log","w")
+
+
+
+def count_pairs(s):
+    pairs_cnt = 0
+    unique_chars = set(s)
+    for char in unique_chars:
+        pairs_cnt += s.count(char + char)
+    return pairs_cnt
+
+read1 = iotools.open_file(args.outname + "unambiguous_barcode_R1.fastq.gz","w")
+read2 = iotools.open_file(args.outname + "unambiguous_barcode_R2.fastq.gz","w")
+
+read1_no = iotools.open_file(args.outname + "ambiguous_barcode_R1.fastq.gz","w")
+read2_no = iotools.open_file(args.outname + "ambiguous_barcode_R2.fastq.gz","w")
+
+
+# generate set of barcodes for whitelist
+barcodes = []
+with pysam.FastxFile(args.infile) as fh:
+    for record in fh:
+        
+
+        
+        
+        seq_nano = record.sequence
+
+        m=regex.finditer("(AAGCAGTGGTATCAACGCAGAGT){e<=3}", str(seq_nano))
+
+
+        for i in m:
+            
+            new_seq = seq_nano[i.end():]
+            new_seq_quality = record.quality[i.end():]
+            
+            m=regex.finditer("(TTTTTTTTTTTTTTTTTTTT){e<=3}", str(seq_nano))
+            for i in m:
+                read2_seq = seq_nano[i.start():]
+                read2_seq_quality = record.quality[i.start():]
+
+            barcode = new_seq[2:26] 
+            barcode_quality = new_seq_quality[2:26] 
+            umi = new_seq[26:42]
+            umi_quality = new_seq_quality[26:42]
+            
+            barcode_umi = barcode + umi
+            barcode_umi_quality = barcode_quality + umi_quality
+
+            if count_pairs(barcode) == 8:
+                barcode_umi = barcode[::2] + umi
+                barcodes.append(barcode[::2])
+                
+                barcode_umi_quality = barcode_quality[::2] + umi_quality
+
+                
+                read1.write("@%s\n%s\n+\n%s\n" % (record.name, barcode_umi, barcode_umi_quality))
+                read2.write("@%s\n%s\n+\n%s\n" % (record.name, read2_seq, read2_seq_quality))
+                
+            else:
+                if len(barcode_umi) == 40: 
+                    read1_no.write("@%s\n%s\n+\n%s\n" % (record.name, barcode_umi, barcode_umi_quality))
+                    read2_no.write("@%s\n%s\n+\n%s\n" % (record.name, read2_seq, read2_seq_quality))
+                else:
+                    pass
+
+                
+    # Write out a list of whitelist barcodes
+    out_barcodes = open(args.whitelist,"w")
+    y = 0
+    for i in set(barcodes):
+        y += 1
+        out_barcodes.write("%s\n" % (i))
+    out_barcodes.close()
+        
+read1.close()
+read2.close()
+read1_no.close()
+read2_no.close()
+
+
+log.write("The number of barcodes identified is: %s\n" %(y))
+
+log.close()

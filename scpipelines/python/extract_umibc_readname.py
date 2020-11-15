@@ -2,7 +2,6 @@ import sys
 import regex
 import cgatcore.iotools as iotools
 import pysam
-import Levenshtein
 import logging
 import argparse
 
@@ -11,7 +10,7 @@ import argparse
 # ########################################################################### #
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-L = logging.getLogger("extract_cells_from_loom.py")
+L = logging.getLogger("collapse_bcumi.py")
 
 
 # ########################################################################### #
@@ -19,8 +18,6 @@ L = logging.getLogger("extract_cells_from_loom.py")
 # ########################################################################### #
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--whitelist", default=None, type=str,
-                    help='a file barcodes extracted using umi whitelist')
 parser.add_argument("--read1", default=None, type=str,
                     help='read1 fastq  file')
 parser.add_argument("--read2", default=None, type=str,
@@ -33,36 +30,34 @@ L.info("args:")
 print(args)
 
 # ########################################################################### #
-# ######################## Import whitelist    ############################## #
+# ######################## Code                ############################## #
 # ########################################################################### #
 
-outf = iotools.open_file(paste0(args.outname,".fastq.1.gz"),"w")
-outf2 = iotools.open_file(paste0(args.outname,".fastq.2.gz"),"w")
+log =  iotools.open_file(args.outname + "extract_readname" + ".log","w")
 
 
-with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
-    
-    n = 0
-    y = 0
+outf = open("unambiguous_fixed_processed_R1.fastq","w")
+outf2 = open("unambiguous_fixed_processed_R2.fastq","w")
+
+with pysam.FastxFile("unambiguous_fixed_barcode_R1.fastq") as fh, pysam.FastxFile("unambiguous_fixed_barcode_R2.fastq") as fh2:
+
     for record_fh, record_fh2  in zip(fh, fh2):
-        barcode = record_fh.sequence[0:24]
 
-        y += 1
+        umi = "_" + record_fh.sequence[:12] + "_" + record_fh.sequence[12:]
+        sequence = record_fh.sequence[:12]
+        quality = record_fh.quality[:12]
+        name_R1 = record_fh.name + umi
+        
+        name_R2 = record_fh2.name + umi
+        
+        
+        outf.write("@%s\n%s\n+\n%s\n" % (name_R1, sequence, quality))
+        outf2.write("@%s\n%s\n+\n%s\n" % (name_R2, record_fh2.sequence, record_fh2.quality))
 
-        for b in barcodes:
-
-            
-
-            if Levenshtein.distance(barcode, b) <= 2:
-                n +=1
-                b = b + record_fh.sequence[24:]
-
-                outf.write("@%s\n%s\n+\n%s\n" % (record_fh.name, b, record_fh.quality))
-                outf2.write("@%s\n%s\n+\n%s\n" % (record_fh2.name, record_fh2.sequence, record_fh2.quality))
-                break
-                
-            else:
-                pass
 
 outf.close()
 outf2.close()
+
+log.write("The number of barcodes identified is: %s\n" %(y))
+
+log.close()
