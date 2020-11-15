@@ -36,6 +36,8 @@ print(args)
 # ########################################################################### #
 
 
+tab = str.maketrans("ACTG", "TGAC")
+
 def reverse_complement_table(seq):
     return seq.translate(tab)[::-1]
 
