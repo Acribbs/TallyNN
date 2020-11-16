@@ -274,14 +274,6 @@ def combine_perfect_corrected(infiles, outfile):
     P.run(statement)
 
 
-def correct_reads(infile, outfile):
-    '''Use levenshtein distance and correct the barcodes '''
-
-    statement = ''' '''
-
-    P.run(statement)
-
-
 @follows(combine_perfect_corrected)
 def full():
     pass

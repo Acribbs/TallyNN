@@ -88,7 +88,7 @@ else:
         DATADIR = PARAMS['data']
 
 
-SEQUENCESUFFIXES = ("*.fastq.gz")
+SEQUENCESUFFIXES = ("*.fastq")
 SEQUENCEFILES = tuple([os.path.join(DATADIR, suffix_name)
                        for suffix_name in SEQUENCESUFFIXES])
 
@@ -142,6 +142,175 @@ def identify_perfect(infile, outfile):
     statement = '''python %(PYTHON_ROOT)s/identify_perfect_nano.py --outname=%(name)s --infile=%(infile)s --whitelist=%(name)s.whitelist.txt'''
 
     P.run(statement)
+
+
+@merge(identify_perfect, "unambiguous.fastq.1")
+def merge_unambiguous(infiles, outfile):
+    '''
+    in order to identiify the true whitelist barcodes the next step is to merge the fastq files together
+    '''
+
+    infile = []
+    infile2 = []
+
+    for i in infiles:
+        infile2.append(i.replace("_ambiguous_barcode_R1.fastq","_unambiguous_barcode_R2.fastq"))
+        infile.append(str(i.replace("_ambiguous_barcode_R1.fastq","_unambiguous_barcode_R1.fastq")))
+
+    outfile2 = outfile.replace(".fastq.1",".fastq.2")
+    infiles = " ".join(infile)
+    infiles2 = " ".join(infile2)
+
+    statement = '''cat %(infiles)s > %(outfile)s &&
+                   cat %(infiles2)s > %(outfile2)s'''
+
+    P.run(statement)
+
+
+@merge(identify_perfect, "whitelist.txt")
+def merge_whitelist(infiles, outfile):
+    '''
+    merge whitelists
+    '''
+
+    whitelists = []
+
+    for i in infiles:
+        print(i)
+        whitelists.append(i.replace("_ambiguous_barcode_R1.fastq",".whitelist.txt"))
+
+
+    whitelist_files = " ".join(whitelists)
+
+    statement = '''cat %(whitelist_files)s | sort | uniq > %(outfile)s'''
+
+    P.run(statement)
+
+
+@merge(identify_perfect, "ambiguous.fastq.1")
+def merge_ambiguous(infiles, outfile):
+    '''
+    in order to identiify the true whitelist barcodes the next step is to merge the fastq files together
+    '''
+
+    infile = []
+    infile2 = []
+
+    for i in infiles:
+        infile2.append(i.replace("_ambiguous_barcode_R1.fastq","_ambiguous_barcode_R2.fastq"))
+        infile.append(str(i))
+
+    outfile2 = outfile.replace(".fastq.1",".fastq.2")
+    infiles = " ".join(infile)
+    infiles2 = " ".join(infile2)
+
+    statement = '''cat %(infiles)s > %(outfile)s &&
+                   cat %(infiles2)s > %(outfile2)s'''
+
+    P.run(statement)
+
+
+@follows(mkdir("whitelist.dir"))
+@transform(merge_unambiguous,
+           regex("unambiguous.fastq.1"),
+           r"whitelist.dir/whitelist.txt")
+def whitelist_umitools(infile, outfile):
+    ''' '''
+
+    
+    cell_num = PARAMS['whitelist']
+    statement = '''umi_tools whitelist --stdin=%(infile)s --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN
+                   --set-cell-number=%(cell_num)s -L extract.log > whitelist.dir/whitelist.txt
+ '''
+
+    P.run(statement)
+
+
+@follows(mkdir("correct_reads.dir"))
+@transform(identify_perfect,
+         regex("perfect_reads.dir/(\S+)_ambiguous_barcode_R1.fastq"),
+         add_inputs(merge_whitelist),
+         r"correct_reads.dir/\1_unambiguous_fixed_barcode_R1.fastq")
+def correct_reads(infiles, outfile):
+    '''Use levenshtein distance and correct the barcodes '''
+
+    infile, whitelist_file = infiles
+
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+    infile2 = infile.replace("_ambiguous_barcode_R1.fastq","_ambiguous_barcode_R2.fastq")
+    name = outfile.replace("_unambiguous_fixed_barcode_R1.fastq","")
+
+    ld = PARAMS['distance']
+
+    statement = '''python %(PYTHON_ROOT)s/correct_barcode_nano.py --whitelist=%(whitelist_file)s --read1=%(infile)s --read2=%(infile2)s
+                   --outname=%(name)s --distance=%(ld)s'''
+
+    P.run(statement)
+
+
+@merge(correct_reads, "merge_corrected.fastq.1")
+def merge_correct_reads(infiles, outfile):
+    '''Merge the corrected reads '''
+
+    infile = []
+    infile2 = []
+
+    for i in infiles:
+        infile2.append(i.replace("_R1.fastq","_R2.fastq"))
+        infile.append(str(i))
+ 
+    infiles = " ".join(infile)
+    infiles2 = " ".join(infile2)
+
+    outfile2 = outfile.replace(".fastq.1",".fastq.2")
+
+    statement = '''cat %(infiles)s > %(outfile)s &&
+                   cat %(infiles2)s > %(outfile2)s'''
+
+    P.run(statement)
+
+
+@transform(merge_correct_reads,
+           regex("merge_corrected.fastq.1"),
+           add_inputs(merge_unambiguous),
+           r"final.fastq.1.gz" )
+def merge_full(infiles, outfile):
+    ''' '''
+
+    infile1_R1, infile2_R1 = infiles
+
+    infile1_R2 = infile1_R1.replace(".fastq.1",".fastq.2") 
+    infile2_R2 = infile2_R1.replace(".fastq.1",".fastq.2")
+
+    statement = '''cat %(infile1_R1)s %(infile2_R1)s| gzip  > final.fastq.1.gz &&
+                  cat %(infile1_R2)s %(infile2_R2)s | gzip  > final.fastq.2.gz'''
+
+    P.run(statement)
+
+
+@transform(merge_full,
+           regex("final.fastq.1.gz"),
+           r"final.sam")
+def mapping(infile, outfile):
+    '''Rum minimap2 to map the fastq files'''
+
+    infile = infile.replace(".fastq.1.gz",".fastq.2.gz")
+    
+    cdna = PARAMS['minimap2_fasta_cdna']
+    options = PARAMS['minimap2_options']
+
+    statement = '''minimap2  %(options)s %(cdna)s  %(infile)s > %(outfile)s 2> %(outfile)s.log'''
+
+    P.run(statement)
+
+
+# Need to merge correct reads with the unambiguous reads
+# Then run umi-tools whitelist
+# Extract umi and barcode and add to read name
+# Then map using minimap2
+# Run UMI toos to demultiplex
+# Add tag XT to bam file and run umi-tools counts
 
 
 @follows(correct_polyA)

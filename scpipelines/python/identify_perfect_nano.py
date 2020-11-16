@@ -92,10 +92,11 @@ with pysam.FastxFile(args.infile) as fh:
                 
                 barcode_umi_quality = barcode_quality + umi_quality
 
-                
-                read1.write("@%s\n%s\n+\n%s\n" % (record.name, barcode_umi, barcode_umi_quality))
-                read2.write("@%s\n%s\n+\n%s\n" % (record.name, read2_seq, read2_seq_quality))
-                
+                if len(barcode_umi) == 40:
+                    read1.write("@%s\n%s\n+\n%s\n" % (record.name, barcode_umi, barcode_umi_quality))
+                    read2.write("@%s\n%s\n+\n%s\n" % (record.name, read2_seq, read2_seq_quality))
+                else:
+                    pass
             else:
                 if len(barcode_umi) == 40: 
                     read1_no.write("@%s\n%s\n+\n%s\n" % (record.name, barcode_umi, barcode_umi_quality))
