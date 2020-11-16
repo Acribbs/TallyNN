@@ -29,10 +29,16 @@ data: data.dir
 
 # Number of reads to split the fastq file by for parallelization
 # Needs to be a multiple of 4
-split: 40000
+split: 2000000
 
 # Levenshtein distance
 distance: 4
 
 # Numbers of cells for whitelist
 whitelist: 2000
+
+# minimap2 mapping options
+minimap2:
+   options: -ax splice -uf --MD --sam-hit-only
+
+   fasta_cdna: hg38-mm10.fa

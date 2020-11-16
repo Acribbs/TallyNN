@@ -291,9 +291,58 @@ def merge_full(infiles, outfile):
 
 @transform(merge_full,
            regex("final.fastq.1.gz"),
+           r"final_extract.fastq.1.gz")
+def extract_barcodeumi(infile, outfile):
+    ''' '''
+
+    infile2 = infile.replace(".fastq.1.gz",".fastq.2.gz")
+    name = outfile.replace(".fastq.1.gz","")
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+    statement = '''python %(PYTHON_ROOT)s/extract_umibc_readname.py --read1=%(infile)s --read2=%(infile2)s --outname=%(name)s'''
+
+    P.run(statement)
+
+
+@follows(mkdir("whitelist.dir/"))
+@transform(merge_full,
+           regex("final.fastq.1.gz"),
+           r"whitelist.dir/whitelist2.txt")
+def whitelist_umitools2(infile, outfile):
+    ''' '''
+
+    
+    cell_num = PARAMS['whitelist']
+    statement = '''umi_tools whitelist --stdin=%(infile)s --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN
+                   --set-cell-number=%(cell_num)s -L extract.log > whitelist.dir/whitelist2.txt
+ '''
+
+    P.run(statement)
+
+
+@transform(merge_full,
+           regex("final.fastq.1.gz"),
+           add_inputs(whitelist_umitools2),
+           r"final_extract_umitools.fastq.1.gz")
+def extract_barcodeumitools(infiles, outfile):
+    ''' '''
+    infile, whitelist = infiles
+
+    whitelist = "".join(whitelist)
+
+    infile2 = infile.replace(".fastq.1.gz",".fastq.2.gz")
+    outfile2 = outfile.replace(".fastq.1.gz",".fastq.2.gz")
+
+    statement = '''umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN --stdin %(infile)s 
+                   --stdout=%(outfile)s --read2-in %(infile2)s --read2-out=%(outfile2)s --whitelist=%(whitelist)s'''
+
+    P.run(statement)
+
+@transform(extract_barcodeumitools,
+           regex("final_extract_umitools.fastq.1.gz"),
            r"final.sam")
 def mapping(infile, outfile):
-    '''Rum minimap2 to map the fastq files'''
+    '''Run minimap2 to map the fastq files'''
 
     infile = infile.replace(".fastq.1.gz",".fastq.2.gz")
     
@@ -305,6 +354,44 @@ def mapping(infile, outfile):
     P.run(statement)
 
 
+@transform(mapping,
+           regex("final.sam"),
+           r"final_sorted.bam")
+def run_samtools(infile, outfile):
+    '''convert sam to bam and sort'''
+
+    statement = '''samtools view -bS %(infile)s > final.bam &&
+                   samtools sort final.bam -o final_sorted.bam &&
+                   samtools index final_sorted.bam'''
+
+    P.run(statement)
+
+
+@transform(run_samtools,
+           regex("final_sorted.bam"),
+           r"final_XT.bam")
+def add_xt_tag(infile, outfile):
+    '''Add trancript name to XT tag in bam file so umi-tools counts can be  perfromed'''
+
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+
+    statement = '''python %(PYTHON_ROOT)s/xt_tag_nano.py --infile=%(infile)s --outfile=%(outfile)s &&
+                   samtools index %(outfile)s'''
+
+    P.run(statement)
+
+
+@transform(add_xt_tag,
+         regex("final_XT.bam"),
+         r"counts.tsv.gz")
+def count(infile, outfile):
+    '''use umi_tools to count the reads - need to adapt umi tools to double oligo'''
+
+    statement = '''umi_tools count --per-gene --gene-tag=XT --per-cell --wide-format-cell-counts -I %(infile)s -S counts.tsv.gz'''
+
+    P.run(statement)
+
 # Need to merge correct reads with the unambiguous reads
 # Then run umi-tools whitelist
 # Extract umi and barcode and add to read name
@@ -313,7 +400,7 @@ def mapping(infile, outfile):
 # Add tag XT to bam file and run umi-tools counts
 
 
-@follows(correct_polyA)
+@follows(count)
 def full():
     pass
 

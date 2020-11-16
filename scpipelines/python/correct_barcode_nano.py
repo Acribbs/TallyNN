@@ -67,7 +67,6 @@ with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
             
 
             if Levenshtein.distance(barcode, b) <= int(args.distance):
-
                 n +=1
                 b = b + record_fh.sequence[24:]
 

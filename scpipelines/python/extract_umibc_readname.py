@@ -3,6 +3,7 @@ import regex
 import cgatcore.iotools as iotools
 import pysam
 import logging
+import gzip
 import argparse
 
 # ########################################################################### #
@@ -33,13 +34,11 @@ print(args)
 # ######################## Code                ############################## #
 # ########################################################################### #
 
-log =  iotools.open_file(args.outname + "extract_readname" + ".log","w")
 
+outf = gzip.open(args.outname + ".fastq.1.gz","wt")
+outf2 = gzip.open(args.outname + ".fastq.2.gz","wt")
 
-outf = open("unambiguous_fixed_processed_R1.fastq","w")
-outf2 = open("unambiguous_fixed_processed_R2.fastq","w")
-
-with pysam.FastxFile("unambiguous_fixed_barcode_R1.fastq") as fh, pysam.FastxFile("unambiguous_fixed_barcode_R2.fastq") as fh2:
+with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
 
     for record_fh, record_fh2  in zip(fh, fh2):
 
@@ -58,6 +57,3 @@ with pysam.FastxFile("unambiguous_fixed_barcode_R1.fastq") as fh, pysam.FastxFil
 outf.close()
 outf2.close()
 
-log.write("The number of barcodes identified is: %s\n" %(y))
-
-log.close()

@@ -86,7 +86,7 @@ with pysam.FastxFile(args.infile) as fh:
             barcode_umi = barcode + umi
             barcode_umi_quality = barcode_quality + umi_quality
 
-            if count_pairs(barcode) == 8:
+            if count_pairs(barcode) == 12:
                 barcode_umi = barcode + umi
                 barcodes.append(barcode)
                 
