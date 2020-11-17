@@ -35,10 +35,13 @@ split: 2000000
 distance: 4
 
 # Numbers of cells for whitelist
-whitelist: 2000
+whitelist: 3000
 
 # minimap2 mapping options
 minimap2:
    options: -ax splice -uf --MD --sam-hit-only
 
    fasta_cdna: hg38-mm10.fa
+
+database:
+   url: sqlite:///./csvdb

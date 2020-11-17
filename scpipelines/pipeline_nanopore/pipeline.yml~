@@ -35,7 +35,7 @@ split: 2000000
 distance: 4
 
 # Numbers of cells for whitelist
-whitelist: 20
+whitelist: 3000
 
 # minimap2 mapping options
 minimap2:

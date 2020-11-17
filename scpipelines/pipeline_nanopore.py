@@ -64,6 +64,7 @@ import glob
 
 import cgatcore.pipeline as P
 import cgatcore.experiment as E
+import cgatcore.database as database
 
 # Load options from the config file
 
@@ -86,6 +87,16 @@ else:
         DATADIR = "data.dir"
     else:
         DATADIR = PARAMS['data']
+
+
+
+def connect():
+    ''' Connect to database'''
+
+    dbh = sqlite3.connect('csvdb')
+
+    return dbh
+
 
 
 SEQUENCESUFFIXES = ("*.fastq")
@@ -229,7 +240,7 @@ def whitelist_umitools(infile, outfile):
 @follows(mkdir("correct_reads.dir"))
 @transform(identify_perfect,
          regex("perfect_reads.dir/(\S+)_ambiguous_barcode_R1.fastq"),
-         add_inputs(merge_whitelist),
+         add_inputs(whitelist_umitools),
          r"correct_reads.dir/\1_unambiguous_fixed_barcode_R1.fastq")
 def correct_reads(infiles, outfile):
     '''Use levenshtein distance and correct the barcodes '''
@@ -388,19 +399,24 @@ def add_xt_tag(infile, outfile):
 def count(infile, outfile):
     '''use umi_tools to count the reads - need to adapt umi tools to double oligo'''
 
-    statement = '''umi_tools count --per-gene --gene-tag=XT --per-cell --wide-format-cell-counts -I %(infile)s -S counts.tsv.gz'''
+    statement = '''umi_tools count --per-gene --gene-tag=XT --per-cell -I %(infile)s -S counts.tsv.gz'''
 
     P.run(statement)
 
-# Need to merge correct reads with the unambiguous reads
-# Then run umi-tools whitelist
-# Extract umi and barcode and add to read name
-# Then map using minimap2
-# Run UMI toos to demultiplex
-# Add tag XT to bam file and run umi-tools counts
+@follows(mkdir("mtx.dir"))
+@transform(count,
+           regex("counts.tsv.gz"),
+           r"mtx.dir/genes.mtx")
+def convert_tomtx(infile, outfile):
+    ''' '''
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+    statement = '''python %(PYTHON_ROOT)s/save_mtx.py --data=%(infile)s'''
+
+    P.run(statement)
 
 
-@follows(count)
+@follows(convert_tomtx)
 def full():
     pass
 

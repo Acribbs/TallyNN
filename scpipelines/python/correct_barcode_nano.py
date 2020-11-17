@@ -50,7 +50,7 @@ whitelist = open(args.whitelist, "r")
 barcodes = []
 
 for line in whitelist:
-    barcodes.append(line.strip())
+    barcodes.append(line.split("\t")[0])
 
 barcodes = set(barcodes)
 
