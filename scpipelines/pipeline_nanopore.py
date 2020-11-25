@@ -84,7 +84,7 @@ else:
     if PARAMS['data'] == 0:
         DATADIR = "."
     elif PARAMS['data'] == 1:
-        DATADIR = "data.dir"
+        DATADIR = "data"
     else:
         DATADIR = PARAMS['data']
 
@@ -107,7 +107,7 @@ SEQUENCEFILES = tuple([os.path.join(DATADIR, suffix_name)
 
 
 @follows(mkdir("split_tmp.dir"))
-@split('data.dir/*.fastq.gz',"split_tmp.dir/out*")
+@split('data/*.fastq.gz',"split_tmp.dir/out*")
 def split_fastq(infile, outfiles):
     '''
     Split the fastq file before identifying perfect barcodes
@@ -399,7 +399,7 @@ def add_xt_tag(infile, outfile):
 def count(infile, outfile):
     '''use umi_tools to count the reads - need to adapt umi tools to double oligo'''
 
-    statement = '''umi_tools count --per-gene --gene-tag=XT --per-cell -I %(infile)s -S counts.tsv.gz'''
+    statement = '''umi_tools count --per-gene --gene-tag=XT --per-cell --dual-nucleotide -I %(infile)s -S counts.tsv.gz'''
 
     P.run(statement)
 
@@ -411,12 +411,183 @@ def convert_tomtx(infile, outfile):
     ''' '''
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
-    statement = '''python %(PYTHON_ROOT)s/save_mtx.py --data=%(infile)s'''
+    statement = '''python %(PYTHON_ROOT)s/save_mtx.py --data=%(infile)s --dir=mtx.dir/'''
 
     P.run(statement)
 
 
-@follows(convert_tomtx)
+
+###############################################################################
+###### This section deals with mapping the unambiguous reads only #############
+###############################################################################
+
+
+@transform(merge_unambiguous,
+           regex("unambiguous.fastq.1"),
+           r"unambiguous.fastq.1.gz")
+def gzip_unambiguous(infile, outfile):
+    ''' '''
+
+    statement = '''gzip < unambiguous.fastq.1 > unambiguous.fastq.1.gz &&
+                   gzip < unambiguous.fastq.2 > unambiguous.fastq.2.gz'''
+    P.run(statement)
+
+
+@transform(gzip_unambiguous,
+           regex("unambiguous.fastq.1.gz"),
+           r"unambiguous_extract_umitools.fastq.1.gz")
+def extract_barcodeumitools_unambiguous(infile, outfile):
+    ''' '''
+
+    infile2 = infile.replace(".fastq.1.gz",".fastq.2.gz")
+    outfile2 = outfile.replace(".fastq.1.gz",".fastq.2.gz")
+
+    statement = '''umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN --stdin %(infile)s 
+                   --stdout=%(outfile)s --read2-in %(infile2)s --read2-out=%(outfile2)s'''
+
+    P.run(statement)
+
+
+@transform(extract_barcodeumitools_unambiguous,
+           regex("unambiguous_extract_umitools.fastq.1.gz"),
+           r"unambiguous.sam")
+def mapping_unambiguous(infile, outfile):
+    '''Run minimap2 to map the fastq files'''
+
+    infile = infile.replace(".fastq.1.gz",".fastq.2.gz")
+    
+    cdna = PARAMS['minimap2_fasta_cdna']
+    options = PARAMS['minimap2_options']
+
+    statement = '''minimap2  %(options)s %(cdna)s  %(infile)s > %(outfile)s 2> %(outfile)s.log'''
+
+    P.run(statement)
+
+
+@transform(mapping_unambiguous,
+           regex("unambiguous.sam"),
+           r"final_sorted_unambiguous.bam")
+def run_samtools_unambiguous(infile, outfile):
+    '''convert sam to bam and sort'''
+
+    statement = '''samtools view -bS %(infile)s > final_unambiguous.bam &&
+                   samtools sort final_unambiguous.bam -o final_sorted_unambiguous.bam &&
+                   samtools index final_sorted_unambiguous.bam'''
+
+    P.run(statement)
+
+
+@transform(run_samtools_unambiguous,
+           regex("final_sorted_unambiguous.bam"),
+           r"final_XT_unambiguous.bam")
+def add_xt_tag_unambiguous(infile, outfile):
+    '''Add trancript name to XT tag in bam file so umi-tools counts can be  perfromed'''
+
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+
+    statement = '''python %(PYTHON_ROOT)s/xt_tag_nano.py --infile=%(infile)s --outfile=%(outfile)s &&
+                   samtools index %(outfile)s'''
+
+    P.run(statement)
+
+
+@transform(add_xt_tag_unambiguous,
+         regex("final_XT_unambiguous.bam"),
+         r"counts_unambiguous.tsv.gz")
+def count_unambiguous(infile, outfile):
+    '''use umi_tools to count the reads - need to adapt umi tools to double oligo'''
+
+    statement = '''umi_tools count --per-gene --gene-tag=XT --per-cell --dual-nucleotide -I %(infile)s -S %(outfile)s'''
+
+    P.run(statement)
+
+@follows(mkdir("mtx_unambiguous.dir"))
+@transform(count_unambiguous,
+           regex("counts_unambiguous.tsv.gz"),
+           r"mtx_unambiguous.dir/genes.mtx")
+def convert_tomtx_unambiguous(infile, outfile):
+    ''' '''
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+    statement = '''python %(PYTHON_ROOT)s/save_mtx.py --data=%(infile)s --dir=mtx_unambiguous.dir/'''
+
+    P.run(statement)
+
+
+
+###############################################################################
+###### This section deals with mapping long reads to genes        #############
+###############################################################################
+
+
+@transform(extract_barcodeumitools,
+           regex("final_extract_umitools.fastq.1.gz"),
+           r"final_gene.sam")
+def mapping_gene(infile, outfile):
+    '''Run minimap2 to map the fastq files to the genome for gene level analysis'''
+
+    infile = infile.replace(".fastq.1.gz",".fastq.2.gz")
+    
+    dna = PARAMS['minimap2_fasta_genome']
+    junc_bed = PARAMS['minimap2_junc_bed']
+
+    statement = '''minimap2 -ax splice -uf --MD --sam-hit-only %(junc_bed)s %(dna)s %(infile)s > %(outfile)s 2> %(outfile)s.log'''
+
+    P.run(statement)
+
+
+@transform(mapping_gene,
+           regex("final_gene.sam"),
+           r"final_gene_sorted.bam")
+def run_samtools_gene(infile, outfile):
+    '''convert sam to bam and sort'''
+
+    statement = '''samtools view -bS %(infile)s > final_gene.bam &&
+                   samtools sort final_gene.bam -o final_gene_sorted.bam &&
+                   samtools index final_gene_sorted.bam'''
+
+    P.run(statement)
+
+
+@transform(run_samtools_gene,
+           regex("final_gene_sorted.bam"),
+           r"Aligned_final_gene_sorted.bam")
+def feature_counts(infile, outfile):
+    ''' '''
+
+    statement = '''featureCounts -a  %(featurecounts_gtf)s -o gene_assigned -R BAM Aligned.final_gene.bam -T 4 &&
+                   samtools sort Aligned.final_gene.bam -o Aligned-final_gene_sorted.bam &&
+                   samtools index Aligned_final_gene_sorted.bam'''
+
+    P.run(statement)
+
+
+@transform(feature_counts,
+         regex("Aligned_final_gene_sorted.bam"),
+         r"counts_genes.tsv.gz")
+def count_genes(infile, outfile):
+    '''use umi_tools to count the reads - need to adapt umi tools to double oligo'''
+
+    statement = '''umi_tools count --per-gene --gene-tag=XT --per-cell --dual-nucleotide -I %(infile)s -S %(outfile)s'''
+
+    P.run(statement)
+
+
+@follows(mkdir("mtx_genes.dir"))
+@transform(count_genes,
+           regex("counts_genes.tsv.gz"),
+           r"mtx_genes.dir/genes.mtx")
+def convert_tomtx_genes(infile, outfile):
+    ''' '''
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+    statement = '''python %(PYTHON_ROOT)s/save_mtx.py --data=%(infile)s --dir=mtx.dir/'''
+
+    P.run(statement)
+
+
+@follows(convert_tomtx, convert_tomtx_unambiguous, convert_tomtx_genes)
 def full():
     pass
 

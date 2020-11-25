@@ -29,7 +29,7 @@ data: data.dir
 
 # Number of reads to split the fastq file by for parallelization
 # Needs to be a multiple of 4
-split: 2000000
+split: 1000000
 
 # Levenshtein distance
 distance: 4
@@ -39,9 +39,16 @@ whitelist: 3000
 
 # minimap2 mapping options
 minimap2:
-   options: -ax splice -uf --MD --sam-hit-only
+   options: -ax map-ont --MD --sam-hit-only 
 
-   fasta_cdna: hg38-mm10.fa
+   fasta_cdna: Homo_sapiens-GRCh38.fa
 
+   fasta_genome: /ifs/mirror/genomes/plain/hg38.fasta
+
+   junc_bed: --junc-bed /ifs/research-groups/botnar/proj034/analyses/nanopore_E3-Mix/data/Homo_sapiens.GRCh38.101.bed
+
+featurecounts:
+
+   gtf: /ifs/research-groups/botnar/proj034/analyses/nanopore_E3-Mix/data/Homo_sapiens.GRCh38.101.gtf
 database:
    url: sqlite:///./csvdb

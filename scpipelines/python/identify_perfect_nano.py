@@ -55,6 +55,9 @@ read1_no = iotools.open_file(args.outname + "_ambiguous_barcode_R1.fastq","w")
 read2_no = iotools.open_file(args.outname + "_ambiguous_barcode_R2.fastq","w")
 
 
+a = 0
+ua = 0
+total = 0
 # generate set of barcodes for whitelist
 barcodes = []
 with pysam.FastxFile(args.infile) as fh:
@@ -64,6 +67,7 @@ with pysam.FastxFile(args.infile) as fh:
         
         
         seq_nano = record.sequence
+        total += 1
 
         m=regex.finditer("(AAGCAGTGGTATCAACGCAGAGT){e<=3}", str(seq_nano))
 
@@ -93,12 +97,14 @@ with pysam.FastxFile(args.infile) as fh:
                 barcode_umi_quality = barcode_quality + umi_quality
 
                 if len(barcode_umi) == 40:
+                    ua += 1
                     read1.write("@%s\n%s\n+\n%s\n" % (record.name, barcode_umi, barcode_umi_quality))
                     read2.write("@%s\n%s\n+\n%s\n" % (record.name, read2_seq, read2_seq_quality))
                 else:
                     pass
             else:
                 if len(barcode_umi) == 40: 
+                    a += 1
                     read1_no.write("@%s\n%s\n+\n%s\n" % (record.name, barcode_umi, barcode_umi_quality))
                     read2_no.write("@%s\n%s\n+\n%s\n" % (record.name, read2_seq, read2_seq_quality))
                 else:
@@ -119,6 +125,11 @@ read1_no.close()
 read2_no.close()
 
 
-log.write("The number of unambiguous barcodes identified is: %s\n" %(y))
+log.write("The number of unambiguous barcodes in whitelist identified is: %s\n" %(y))
+log.write("The number of unambiguous barcode reads identified is: %s\n" %(ua))
+log.write("The number of ambiguous barcode reads identified is: %s\n" %(a))
+log.write("The total number of barcode reads identified is: %s\n" %(total))
+log.write("The percent of unambiguous barcode reads : %s\n" %((ua/total)*100))
+log.write("The percent of ambiguous barcode reads : %s\n" %((a/total)*100))
 
 log.close()
