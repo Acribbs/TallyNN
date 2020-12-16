@@ -1,4 +1,4 @@
-##############################################################################
+#featur#############################################################################
 #
 #   Botnar Resaerch Centre
 #
@@ -369,7 +369,7 @@ def mapping(infile, outfile):
            regex("final.sam"),
            r"final_sorted.bam")
 def run_samtools(infile, outfile):
-    '''convert sam to bam and sort'''
+    '''convert sam to bam and sort -F 272'''
 
     statement = '''samtools view -bS %(infile)s > final.bam &&
                    samtools sort final.bam -o final_sorted.bam &&
@@ -468,9 +468,9 @@ def mapping_unambiguous(infile, outfile):
            regex("unambiguous.sam"),
            r"final_sorted_unambiguous.bam")
 def run_samtools_unambiguous(infile, outfile):
-    '''convert sam to bam and sort'''
+    '''convert sam to bam only taking primary alignments and sort'''
 
-    statement = '''samtools view -bS %(infile)s > final_unambiguous.bam &&
+    statement = '''samtools view -F 256 -bS %(infile)s > final_unambiguous.bam &&
                    samtools sort final_unambiguous.bam -o final_sorted_unambiguous.bam &&
                    samtools index final_sorted_unambiguous.bam'''
 
@@ -532,7 +532,8 @@ def mapping_gene(infile, outfile):
     dna = PARAMS['minimap2_fasta_genome']
     junc_bed = PARAMS['minimap2_junc_bed']
 
-    statement = '''minimap2 -ax splice -uf --MD --sam-hit-only %(junc_bed)s %(dna)s %(infile)s > %(outfile)s 2> %(outfile)s.log'''
+    statement = '''minimap2 -ax splice -uf --MD --sam-hit-only %(junc_bed)s %(dna)s %(infile)s > %(outfile)s.tmp.sam 2> %(outfile)s.log &&
+                   cgat bam2bam --method=strip-sequence -L  %(outfile)s.log <  %(outfile)s.tmp.sam >  %(outfile)s'''
 
     P.run(statement)
 
@@ -543,7 +544,7 @@ def mapping_gene(infile, outfile):
 def run_samtools_gene(infile, outfile):
     '''convert sam to bam and sort'''
 
-    statement = '''samtools view -bS %(infile)s > final_gene.bam &&
+    statement = '''samtools view -bh %(infile)s > final_gene.bam &&
                    samtools sort final_gene.bam -o final_gene_sorted.bam &&
                    samtools index final_gene_sorted.bam'''
 
@@ -556,8 +557,8 @@ def run_samtools_gene(infile, outfile):
 def feature_counts(infile, outfile):
     ''' '''
 
-    statement = '''featureCounts -a  %(featurecounts_gtf)s -o gene_assigned -R BAM Aligned.final_gene.bam -T 4 &&
-                   samtools sort Aligned.final_gene.bam -o Aligned-final_gene_sorted.bam &&
+    statement = '''featureCounts -a  %(featurecounts_gtf)s -o gene_assigned -R BAM %(infile)s  &&
+                   samtools sort final_gene_sorted.bam.featureCounts.bam -o Aligned_final_gene_sorted.bam &&
                    samtools index Aligned_final_gene_sorted.bam'''
 
     P.run(statement)
@@ -582,7 +583,7 @@ def convert_tomtx_genes(infile, outfile):
     ''' '''
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
-    statement = '''python %(PYTHON_ROOT)s/save_mtx.py --data=%(infile)s --dir=mtx.dir/'''
+    statement = '''python %(PYTHON_ROOT)s/save_mtx.py --data=%(infile)s --dir=mtx_genes.dir/'''
 
     P.run(statement)
 
