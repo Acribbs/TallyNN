@@ -1,3 +1,0 @@
-[console_scripts]
-aattggcc = scpipelines.entry:main
-
