@@ -24,6 +24,12 @@ Then, at the moment, you will need to manually install the fork of umi tools
   git clone https://github.com/Acribbs/UMI-tools
   python setup.py install
   ```
+  
+To install aattggcc code
+
+  ```
+  python setup.py install
+  ```
 
 
 Usage
