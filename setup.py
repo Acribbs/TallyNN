@@ -64,11 +64,11 @@ setup(
     classifiers=[_f for _f in classifiers.split("\n") if _f],
     url="",
     # package contents
-    packages=aattccgg_packages,
-    package_dir=aattccgg_package_dirs,
+    packages=aattggcc_packages,
+    package_dir=aattggcc_package_dirs,
     include_package_data=True,
     entry_points={
-        "console_scripts": ["aattccgg = scpipelines.entry:main"]
+        "console_scripts": ["aattggcc = scpipelines.entry:main"]
     },
     # other options
     zip_safe=False,

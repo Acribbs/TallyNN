@@ -1,20 +1,20 @@
 '''
-aattggcc.py - Single Cell analysis workflows for nanopore seq
+cellhub.py - Single Cell analysis workflows for COMBATOxford
 ============================================================
 
 :Tags: Single-cell
 
 To use a specific workflow, type::
 
-    aattggcc <workflow> [workflow options] [workflow arguments]
+    cellhub <workflow> [workflow options] [workflow arguments]
 
 For this message and a list of available keywords type::
 
-    aattggcc --help
+    cellhub --help
 
 To get help for a specify workflow, type::
 
-    aattggcc <workflow> --help
+    cellhub <workflow> --help
 '''
 
 import os
