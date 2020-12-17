@@ -1,0 +1,49 @@
+#include "FastxParser.hpp"
+#include <iostream>
+#include <thread>
+#include <vector>
+#include <string>
+#include <list>
+#include <fstream>
+
+
+
+struct Bases {
+  uint32_t A, C, G, T;
+};
+
+int main(int argc, char* argv[]) {
+   if (argc == 1) {
+       std::cerr << "usage: error_correct_bc fastqR1 fastqR2 whitelist";
+       return 1;
+   } 
+   int numFiles = argc - 1;
+   if (numFiles != 3) {
+       std::cerr << "you must provide 3 files, two fastq and one whitelist file!\n";
+       return 1;
+   }
+   
+   size_t numPairs = numFiles / 2;
+   std::vector<std::string> files;
+   std::vector<std::string> files2;
+   std::vector<std::string> files3;
+
+   files3.push_back(argv[3]);
+   for (size_t i = 1; i <= numPairs; ++i) {
+       files.push_back(argv[i]);
+       files2.push_back(argv[i + numPairs]);
+   }
+
+   // The whitelist needs to be parsed and list of strings generated
+
+   std::list<std::string> bc_list;
+   std::ifstream ifs;
+   ifs.open (argv[3], std::ifstream::in);
+   std::string line;
+
+   while(std::getline(ifs, line)){
+     std::cerr << "\n#A = " << line << '\n';
+   }
+   
+   ifs.close();
+   
