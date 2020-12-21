@@ -22,6 +22,7 @@ EXPRESSIONS = (
     ('FirstLevel', 'scpipelines/*.py'),
     ('SecondLevel', 'scpipelines/python/*.py'))
 
+
 # Code to exclude
 EXCLUDE = ()
 
@@ -43,8 +44,7 @@ def check_import(filename, outfile):
         return
 
     try:
-        name = basename + filename
-        imp.load_source(name)
+        imp.load_source(basename, filename)
 
     except ImportError as msg:
         outfile.write("FAIL %s\n%s\n" % (basename, msg))
