@@ -20,7 +20,7 @@ from nose.tools import ok_
 # DIRECTORIES to examine
 EXPRESSIONS = (
     ('FirstLevel', 'scpipelines/*.py'),
-    ('SecondLevel', 'scpipelines/python/*.py'))
+    ('SecondLevel', 'scpipelines/version.py'))
 
 # Codes to ignore in the pep8 BaseReport
 IGNORE = set(('E101',  # indentation contains mixed spaces and tabs
