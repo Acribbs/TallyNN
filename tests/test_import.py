@@ -19,7 +19,8 @@ from nose.tools import ok_
 
 # DIRECTORIES to examine
 EXPRESSIONS = (
-    ('FirstLevel', 'scpipelines/*.py'))
+    ('FirstLevel', 'scpipelines/*.py'),
+    ('SecondLevel', 'scpipelines/python/collapse_bcumi.py'))
 
 
 # Code to exclude
