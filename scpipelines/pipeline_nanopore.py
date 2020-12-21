@@ -1,4 +1,4 @@
-#featur#############################################################################
+##############################################################################
 #
 #   Botnar Resaerch Centre
 #
@@ -89,7 +89,6 @@ else:
         DATADIR = PARAMS['data']
 
 
-
 def connect():
     ''' Connect to database'''
 
@@ -98,16 +97,13 @@ def connect():
     return dbh
 
 
-
 SEQUENCESUFFIXES = ("*.fastq")
 SEQUENCEFILES = tuple([os.path.join(DATADIR, suffix_name)
                        for suffix_name in SEQUENCESUFFIXES])
 
 
-
-
 @follows(mkdir("split_tmp.dir"))
-@split('data/*.fastq.gz',"split_tmp.dir/out*")
+@split('data/*.fastq.gz', "split_tmp.dir/out*")
 def split_fastq(infile, outfiles):
     '''
     Split the fastq file before identifying perfect barcodes
@@ -146,7 +142,7 @@ def identify_perfect(infile, outfile):
     Identify ambigous and unabiguous reads
     '''
 
-    name  = outfile.replace("_ambiguous_barcode_R1.fastq","")
+    name = outfile.replace("_ambiguous_barcode_R1.fastq", "")
 
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
@@ -165,10 +161,10 @@ def merge_unambiguous(infiles, outfile):
     infile2 = []
 
     for i in infiles:
-        infile2.append(i.replace("_ambiguous_barcode_R1.fastq","_unambiguous_barcode_R2.fastq"))
-        infile.append(str(i.replace("_ambiguous_barcode_R1.fastq","_unambiguous_barcode_R1.fastq")))
+        infile2.append(i.replace("_ambiguous_barcode_R1.fastq", "_unambiguous_barcode_R2.fastq"))
+        infile.append(str(i.replace("_ambiguous_barcode_R1.fastq", "_unambiguous_barcode_R1.fastq")))
 
-    outfile2 = outfile.replace(".fastq.1",".fastq.2")
+    outfile2 = outfile.replace(".fastq.1", ".fastq.2")
     infiles = " ".join(infile)
     infiles2 = " ".join(infile2)
 
@@ -188,8 +184,7 @@ def merge_whitelist(infiles, outfile):
 
     for i in infiles:
         print(i)
-        whitelists.append(i.replace("_ambiguous_barcode_R1.fastq",".whitelist.txt"))
-
+        whitelists.append(i.replace("_ambiguous_barcode_R1.fastq", ".whitelist.txt"))
 
     whitelist_files = " ".join(whitelists)
 
@@ -208,10 +203,10 @@ def merge_ambiguous(infiles, outfile):
     infile2 = []
 
     for i in infiles:
-        infile2.append(i.replace("_ambiguous_barcode_R1.fastq","_ambiguous_barcode_R2.fastq"))
+        infile2.append(i.replace("_ambiguous_barcode_R1.fastq", "_ambiguous_barcode_R2.fastq"))
         infile.append(str(i))
 
-    outfile2 = outfile.replace(".fastq.1",".fastq.2")
+    outfile2 = outfile.replace(".fastq.1", ".fastq.2")
     infiles = " ".join(infile)
     infiles2 = " ".join(infile2)
 
@@ -228,7 +223,6 @@ def merge_ambiguous(infiles, outfile):
 def whitelist_umitools(infile, outfile):
     ''' '''
 
-    
     cell_num = PARAMS['whitelist']
     statement = '''umi_tools whitelist --stdin=%(infile)s --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN
                    --set-cell-number=%(cell_num)s -L extract.log > whitelist.dir/whitelist.txt
@@ -239,9 +233,9 @@ def whitelist_umitools(infile, outfile):
 
 @follows(mkdir("correct_reads.dir"))
 @transform(identify_perfect,
-         regex("perfect_reads.dir/(\S+)_ambiguous_barcode_R1.fastq"),
-         add_inputs(whitelist_umitools),
-         r"correct_reads.dir/\1_unambiguous_fixed_barcode_R1.fastq")
+           regex("perfect_reads.dir/(\S+)_ambiguous_barcode_R1.fastq"),
+           add_inputs(whitelist_umitools),
+           r"correct_reads.dir/\1_unambiguous_fixed_barcode_R1.fastq")
 def correct_reads(infiles, outfile):
     '''Use levenshtein distance and correct the barcodes '''
 
@@ -249,8 +243,8 @@ def correct_reads(infiles, outfile):
 
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
-    infile2 = infile.replace("_ambiguous_barcode_R1.fastq","_ambiguous_barcode_R2.fastq")
-    name = outfile.replace("_unambiguous_fixed_barcode_R1.fastq","")
+    infile2 = infile.replace("_ambiguous_barcode_R1.fastq", "_ambiguous_barcode_R2.fastq")
+    name = outfile.replace("_unambiguous_fixed_barcode_R1.fastq", "")
 
     ld = PARAMS['distance']
 
@@ -268,13 +262,13 @@ def merge_correct_reads(infiles, outfile):
     infile2 = []
 
     for i in infiles:
-        infile2.append(i.replace("_R1.fastq","_R2.fastq"))
+        infile2.append(i.replace("_R1.fastq", "_R2.fastq"))
         infile.append(str(i))
- 
+
     infiles = " ".join(infile)
     infiles2 = " ".join(infile2)
 
-    outfile2 = outfile.replace(".fastq.1",".fastq.2")
+    outfile2 = outfile.replace(".fastq.1", ".fastq.2")
 
     statement = '''cat %(infiles)s > %(outfile)s &&
                    cat %(infiles2)s > %(outfile2)s'''
@@ -285,14 +279,14 @@ def merge_correct_reads(infiles, outfile):
 @transform(merge_correct_reads,
            regex("merge_corrected.fastq.1"),
            add_inputs(merge_unambiguous),
-           r"final.fastq.1.gz" )
+           r"final.fastq.1.gz")
 def merge_full(infiles, outfile):
     ''' '''
 
     infile1_R1, infile2_R1 = infiles
 
-    infile1_R2 = infile1_R1.replace(".fastq.1",".fastq.2") 
-    infile2_R2 = infile2_R1.replace(".fastq.1",".fastq.2")
+    infile1_R2 = infile1_R1.replace(".fastq.1", ".fastq.2")
+    infile2_R2 = infile2_R1.replace(".fastq.1", ".fastq.2")
 
     statement = '''cat %(infile1_R1)s %(infile2_R1)s| gzip  > final.fastq.1.gz &&
                   cat %(infile1_R2)s %(infile2_R2)s | gzip  > final.fastq.2.gz'''
@@ -306,8 +300,8 @@ def merge_full(infiles, outfile):
 def extract_barcodeumi(infile, outfile):
     ''' '''
 
-    infile2 = infile.replace(".fastq.1.gz",".fastq.2.gz")
-    name = outfile.replace(".fastq.1.gz","")
+    infile2 = infile.replace(".fastq.1.gz", ".fastq.2.gz")
+    name = outfile.replace(".fastq.1.gz", "")
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
     statement = '''python %(PYTHON_ROOT)s/extract_umibc_readname.py --read1=%(infile)s --read2=%(infile2)s --outname=%(name)s'''
@@ -322,7 +316,6 @@ def extract_barcodeumi(infile, outfile):
 def whitelist_umitools2(infile, outfile):
     ''' '''
 
-    
     cell_num = PARAMS['whitelist']
     statement = '''umi_tools whitelist --stdin=%(infile)s --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN
                    --set-cell-number=%(cell_num)s -L extract.log > whitelist.dir/whitelist2.txt
@@ -341,13 +334,14 @@ def extract_barcodeumitools(infiles, outfile):
 
     whitelist = "".join(whitelist)
 
-    infile2 = infile.replace(".fastq.1.gz",".fastq.2.gz")
-    outfile2 = outfile.replace(".fastq.1.gz",".fastq.2.gz")
+    infile2 = infile.replace(".fastq.1.gz", ".fastq.2.gz")
+    outfile2 = outfile.replace(".fastq.1.gz", ".fastq.2.gz")
 
-    statement = '''umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN --stdin %(infile)s 
+    statement = '''umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN --stdin %(infile)s
                    --stdout=%(outfile)s --read2-in %(infile2)s --read2-out=%(outfile2)s --whitelist=%(whitelist)s'''
 
     P.run(statement)
+
 
 @transform(extract_barcodeumitools,
            regex("final_extract_umitools.fastq.1.gz"),
@@ -355,8 +349,8 @@ def extract_barcodeumitools(infiles, outfile):
 def mapping(infile, outfile):
     '''Run minimap2 to map the fastq files'''
 
-    infile = infile.replace(".fastq.1.gz",".fastq.2.gz")
-    
+    infile = infile.replace(".fastq.1.gz", ".fastq.2.gz")
+
     cdna = PARAMS['minimap2_fasta_cdna']
     options = PARAMS['minimap2_options']
 
@@ -386,7 +380,6 @@ def add_xt_tag(infile, outfile):
 
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
-
     statement = '''python %(PYTHON_ROOT)s/xt_tag_nano.py --infile=%(infile)s --outfile=%(outfile)s &&
                    samtools index %(outfile)s'''
 
@@ -394,14 +387,15 @@ def add_xt_tag(infile, outfile):
 
 
 @transform(add_xt_tag,
-         regex("final_XT.bam"),
-         r"counts.tsv.gz")
+           regex("final_XT.bam"),
+           r"counts.tsv.gz")
 def count(infile, outfile):
     '''use umi_tools to count the reads - need to adapt umi tools to double oligo'''
 
     statement = '''umi_tools count --per-gene --gene-tag=XT --per-cell --dual-nucleotide -I %(infile)s -S counts.tsv.gz'''
 
     P.run(statement)
+
 
 @follows(mkdir("mtx.dir"))
 @transform(count,
@@ -415,10 +409,8 @@ def convert_tomtx(infile, outfile):
 
     P.run(statement)
 
-
-
 ###############################################################################
-###### This section deals with mapping the unambiguous reads only #############
+#                  This section deals with mapping the unambiguous reads only #
 ###############################################################################
 
 
@@ -439,10 +431,10 @@ def gzip_unambiguous(infile, outfile):
 def extract_barcodeumitools_unambiguous(infile, outfile):
     ''' '''
 
-    infile2 = infile.replace(".fastq.1.gz",".fastq.2.gz")
-    outfile2 = outfile.replace(".fastq.1.gz",".fastq.2.gz")
+    infile2 = infile.replace(".fastq.1.gz", ".fastq.2.gz")
+    outfile2 = outfile.replace(".fastq.1.gz", ".fastq.2.gz")
 
-    statement = '''umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN --stdin %(infile)s 
+    statement = '''umi_tools extract --bc-pattern=CCCCCCCCCCCCCCCCCCCCCCCCNNNNNNNNNNNNNNNN --stdin %(infile)s
                    --stdout=%(outfile)s --read2-in %(infile2)s --read2-out=%(outfile2)s'''
 
     P.run(statement)
@@ -454,8 +446,8 @@ def extract_barcodeumitools_unambiguous(infile, outfile):
 def mapping_unambiguous(infile, outfile):
     '''Run minimap2 to map the fastq files'''
 
-    infile = infile.replace(".fastq.1.gz",".fastq.2.gz")
-    
+    infile = infile.replace(".fastq.1.gz", ".fastq.2.gz")
+
     cdna = PARAMS['minimap2_fasta_cdna']
     options = PARAMS['minimap2_options']
 
@@ -485,7 +477,6 @@ def add_xt_tag_unambiguous(infile, outfile):
 
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
-
     statement = '''python %(PYTHON_ROOT)s/xt_tag_nano.py --infile=%(infile)s --outfile=%(outfile)s &&
                    samtools index %(outfile)s'''
 
@@ -493,14 +484,15 @@ def add_xt_tag_unambiguous(infile, outfile):
 
 
 @transform(add_xt_tag_unambiguous,
-         regex("final_XT_unambiguous.bam"),
-         r"counts_unambiguous.tsv.gz")
+           regex("final_XT_unambiguous.bam"),
+           r"counts_unambiguous.tsv.gz")
 def count_unambiguous(infile, outfile):
     '''use umi_tools to count the reads - need to adapt umi tools to double oligo'''
 
     statement = '''umi_tools count --per-gene --gene-tag=XT --per-cell --dual-nucleotide -I %(infile)s -S %(outfile)s'''
 
     P.run(statement)
+
 
 @follows(mkdir("mtx_unambiguous.dir"))
 @transform(count_unambiguous,
@@ -515,20 +507,17 @@ def convert_tomtx_unambiguous(infile, outfile):
     P.run(statement)
 
 
-
 ###############################################################################
-###### This section deals with mapping long reads to genes        #############
+#                  This section deals with mapping long reads to genes        #
 ###############################################################################
-
-
 @transform(extract_barcodeumitools,
            regex("final_extract_umitools.fastq.1.gz"),
            r"final_gene.sam")
 def mapping_gene(infile, outfile):
     '''Run minimap2 to map the fastq files to the genome for gene level analysis'''
 
-    infile = infile.replace(".fastq.1.gz",".fastq.2.gz")
-    
+    infile = infile.replace(".fastq.1.gz", ".fastq.2.gz")
+
     dna = PARAMS['minimap2_fasta_genome']
     junc_bed = PARAMS['minimap2_junc_bed']
 
@@ -565,8 +554,8 @@ def feature_counts(infile, outfile):
 
 
 @transform(feature_counts,
-         regex("Aligned_final_gene_sorted.bam"),
-         r"counts_genes.tsv.gz")
+           regex("Aligned_final_gene_sorted.bam"),
+           r"counts_genes.tsv.gz")
 def count_genes(infile, outfile):
     '''use umi_tools to count the reads - need to adapt umi tools to double oligo'''
 
@@ -591,6 +580,7 @@ def convert_tomtx_genes(infile, outfile):
 @follows(convert_tomtx, convert_tomtx_unambiguous, convert_tomtx_genes)
 def full():
     pass
+
 
 def main(argv=None):
     if argv is None:
