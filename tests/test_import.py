@@ -19,8 +19,7 @@ from nose.tools import ok_
 
 # DIRECTORIES to examine
 EXPRESSIONS = (
-    ('FirstLevel', 'scpipelines/*.py'),
-    ('SecondLevel', 'scpipelines/python/*.py'))
+    ('FirstLevel', 'scpipelines/*.py'))
 
 
 # Code to exclude
