@@ -14,7 +14,6 @@ import os
 import glob
 import traceback
 import importlib
-from importlib import load_source
 
 from nose.tools import ok_
 
