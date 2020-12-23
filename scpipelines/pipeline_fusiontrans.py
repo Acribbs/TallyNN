@@ -173,7 +173,7 @@ def generate_counts(infiles, outfile):
     P.run(statement)
 
 
-@follows(make_sabam)
+@follows(generate_counts)
 def full():
     pass
 

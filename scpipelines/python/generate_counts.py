@@ -62,9 +62,12 @@ trans_counter =collections.Counter(trans_list)
 
 for k in trans_counter:
     ig, gene, barcode = k.split("_")
-    gene2 = ig + "_" + gene
-    counter = trans_counter[k]
+    if ig == gene:
+        pass
+    else:
+        gene2 = ig + "_" + gene
+        counter = trans_counter[k]
 
-    out_table.write("%s\t%s\t%s\t%s\t%s\n"%(ig, gene, gene2, barcode, str(counter)))
+        out_table.write("%s\t%s\t%s\t%s\t%s\n"%(ig, gene, gene2, barcode, str(counter)))
     
 out_table.close()
