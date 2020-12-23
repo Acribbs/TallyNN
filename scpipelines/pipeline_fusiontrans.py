@@ -99,8 +99,8 @@ def make_sabam(infile, outfile):
 def tabix_bed(infile, outfile):
     ''' convert bed file to tabix'''
 
-    statement = '''cat %(infile)s | bgzip -c > coding_gene_region.bed.gz &&
-                   tabix -p bed coding_gene_region.bed.gz'''
+    statement = '''cat %(infile)s | bgzip -c > %(infile)s.gz &&
+                   tabix -p bed %(infile)s.gz'''
 
     P.run(statement)
 
