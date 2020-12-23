@@ -1,0 +1,39 @@
+import sys
+import regex
+import cgatcore.iotools as iotools
+import pysam
+import logging
+import argparse
+import re
+
+
+
+# ########################################################################### #
+# ###################### Set up the logging ################################# #
+# ########################################################################### #
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+L = logging.getLogger("complement_ployA.py")
+
+# ########################################################################### #
+# ######################## Parse the arguments ############################## #
+# ########################################################################### #
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--infile", default=None, type=str,
+                    help='input bam  file')
+parser.add_argument("--bedfile", default=None, type=str,
+                    help='bedfile  file')
+parser.add_argument("--outfile", default=None, type=str,
+                    help='name for output bam file')
+
+args = parser.parse_args()
+
+L.info("args:")
+print(args)
+
+
+
+# ########################################################################### #
+# ######################## Code                ############################## #
+# ########################################################################### #

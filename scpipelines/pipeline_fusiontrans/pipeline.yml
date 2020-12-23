@@ -24,5 +24,10 @@ version: 0.1
 # The full version, including alpha/beta/rc tags.
 release: 0.1
 
-data: data.dir
+data: data
+
+# uncompressed bed file of coding regions
+bed: coding_gene_region.bed
+
+tmpdir: .
 

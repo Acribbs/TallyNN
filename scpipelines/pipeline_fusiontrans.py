@@ -7,7 +7,7 @@ Pipeline fusiontrans
 Overview
 ==================
 
-The pipeline takes as an input a bam file and generates a bed file of
+The pipeline takes as an input a bam file that was ran using featurecounts from pipeline_nanopore.py and generates a bed file of
 fusion transcripts.
 
 Usage
@@ -112,40 +112,66 @@ def tabix_bed(infile, outfile):
 def fusion_annotate(infiles, outfile):
     '''Annotate fusion and original gene'''
 
+    
     infile, bed = infiles
     bed = bed.replace(".tbi","")
 
-    bamfile = pysam.AlignmentFile(infile)
-    tabixfile = pysam.TabixFile(bed)
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
-    out_bam = pysam.AlignmentFile("test.bam", "wb", template=bamfile)
+    statement = '''python  %(PYTHON_ROOT)s/fusion_annotate.py --infile=%(infile)s --outfile=%(outfile)s --bedfile=%(bed)s'''
 
-    for line in bamfile:
+    P.run(statement)
 
-        a = line.get_tag("SA").split(";")[0]
 
-        chrom, start, strand, cigar, mapq, nm = a.split(",")
+@transform(fusion_annotate,
+           regex("(\S+)_FusionAnnotate.bam"),
+           add_inputs(tabix_bed),
+           r"\1_FinalAnnotate.bam")
+def gene_annotate(infiles, outfile):
+    '''Annotate gene and original gene'''
+
     
-        match = re.findall(r'[0-9]+[A-Za-z]', cigar)
-        for m in match:
-            if "M" in m:
-                m = m.replace("M", "")
-                if "chrUn" in chrom or "alt" in chrom or "KI" in chrom or "GL" in chrom:
-                    pass
-                else:
-                    for gtf in tabixfile.fetch(chrom, int(start), int(start)+int(m)):
-                        gtf = gtf.split("\t")
-                        if gtf[0] == "chrM":
-                            pass
-                        else:
-                            line.tags += [("Ta", gtf[0])]
-                            line.tags += [("Tb", gtf[1])]
-                            line.tags += [("Tc", gtf[2])]
-                            line.tags += [("Td", gtf[3])]
+    infile, bed = infiles
+    bed = bed.replace(".tbi","")
+    outfile_tmp = outfile +  ".tmp"
 
-                            out_bam.write(line)
-        out_bam.close()
-        bamfile.close()
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+    statement = '''python  %(PYTHON_ROOT)s/gene_annotate.py --infile=%(infile)s --outfile=%(outfile_tmp)s --bedfile=%(bed)s &&
+                   samtools sort %(outfile_tmp)s -o %(outfile)s &&
+                   rm -rf %(outfile_tmp)s'''
+
+    P.run(statement)
+
+
+@transform(gene_annotate,
+          regex("(\S+)_FinalAnnotate.bam"),
+          [r"\1_fusion1.bed",r"\1_fusion2.bed"])
+def generate_bedout(infile, outfiles):
+    '''Generate output bed file '''
+
+    outfile1, outfile2 = outfiles
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+    statement = '''python %(PYTHON_ROOT)s/bed_fusion.py --infile=%(infile)s --bed1=%(outfile1)s --bed2=%(outfile2)s'''
+
+    P.run(statement)
+
+
+@transform(generate_bedout,
+           suffix("_fusion1.bed"),
+           "_counts.txt")
+def generate_counts(infiles, outfile):
+    '''Generate counts for each fusion gene'''
+    
+    bed1, bed2 = infiles
+
+    PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
+
+    statement = '''python %(PYTHON_ROOT)s/generate_counts.py --bed1=%(bed1)s --bed2=%(bed2)s --outfile=%(outfile)s'''
+
+    P.run(statement)
+
 
 @follows(make_sabam)
 def full():
