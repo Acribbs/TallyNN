@@ -1,0 +1,54 @@
+################################################################
+#
+#
+# Pipeline pipeline_nanopore.py configuration file for sphinxreport
+#
+# This pipeline.ini file lists some configuration options that you might 
+# want a user to set automatically.
+#
+# Add pipeline specific options into separate sections
+#
+################################################################
+## general options
+
+
+# Project name
+projectname: CGATProject
+
+# Copyright statement
+copyright: CGAT (2010-2014)
+
+# The short X.Y version.
+version: 0.1
+
+# The full version, including alpha/beta/rc tags.
+release: 0.1
+
+data: data.dir
+
+
+# Number of reads to split the fastq file by for parallelization
+# Needs to be a multiple of 4
+split: 1000000
+
+# Levenshtein distance
+distance: 4
+
+# Numbers of cells for whitelist
+whitelist: 3000
+
+# minimap2 mapping options
+minimap2:
+   options: -ax map-ont --MD --sam-hit-only 
+
+   fasta_cdna: Homo_sapiens-GRCh38.fa
+
+   fasta_genome: /ifs/mirror/genomes/plain/hg38.fasta
+
+   junc_bed: --junc-bed /ifs/research-groups/botnar/proj034/analyses/nanopore_E3-Mix/data/Homo_sapiens.GRCh38.101.bed
+
+featurecounts:
+
+   gtf: /ifs/research-groups/botnar/proj034/analyses/nanopore_E3-Mix/data/Homo_sapiens.GRCh38.101.gtf
+database:
+   url: sqlite:///./csvdb
