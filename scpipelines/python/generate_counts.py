@@ -56,7 +56,7 @@ for bed1, bed2 in zip(bed1, bed2):
     trans_gene = ig + "_" + transloc + "_"+ barcode.strip()
     trans_list.append(str(trans_gene))
 
-out_table.write("Ig\tgene\ttrans\tbarcode\tcount\n")
+out_table.write("gene1\tgene2\ttrans\tbarcode\tcount\n")
 
 trans_counter =collections.Counter(trans_list)
 

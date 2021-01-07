@@ -173,7 +173,21 @@ def generate_counts(infiles, outfile):
     P.run(statement)
 
 
-@follows(generate_counts)
+@transform(generate_counts,
+           suffix("_counts.txt"),
+           "_finalcounts.txt")
+def generate_finalcounts(infile, outfile):
+    '''Generate final counts for each fusion gene irrespective of the orientation of the fusion'''
+    
+
+    R_ROOT = os.path.join(os.path.dirname(__file__), "R/")
+
+    statement = '''Rscript %(R_ROOT)s/merge_counts.R --input=%(infile)s --out=%(outfile)s'''
+
+    P.run(statement)
+
+
+@follows(generate_finalcounts)
 def full():
     pass
 

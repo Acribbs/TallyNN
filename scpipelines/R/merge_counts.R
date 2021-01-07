@@ -1,0 +1,35 @@
+#!/usr/bin/env Rscript
+
+library("tidyverse")
+library("optparse")
+
+
+option_list = list(
+  make_option(c("-i", "--input"), type="character", default="", 
+              help="dataframe for marging counts [default= %default]", metavar="character"),
+  make_option(c("-o", "--out"), type="character", default="", 
+              help="output file name [default= %default]", metavar="character")
+	      ); 
+
+
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
+
+
+df <- read.table(opt$input, sep="\t", header=1)
+
+df$gene1 <- as.character(df$gene1)
+df$gene2 <- as.character(df$gene2)
+df$barcode <- as.character(df$barcode)
+df$trans <- as.character(df$trans)
+
+df <- df %>%
+  rowwise() %>%
+  mutate(fusion = paste(sort(c(gene1, gene2)), collapse="_")) %>%
+  ungroup()  %>%
+  group_by(fusion, barcode) %>%
+  summarise(count=sum(count)) %>%
+  ungroup()
+
+
+write.table(df, file=opt$out, row.names=FALSE, sep="\t")
