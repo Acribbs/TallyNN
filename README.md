@@ -8,7 +8,7 @@ We reccomend installing [miniconda](https://docs.conda.io/en/latest/miniconda.ht
 a new environment and install mamba
 
   ```
-  conda create -n aattggcc
+  conda create -n tallynn
   conda install mamba -c conda-forge
   ```
   
@@ -25,7 +25,7 @@ Then, at the moment, you will need to manually install the fork of umi tools
   python setup.py install
   ```
   
-To install aattggcc code
+To install tallynn code
 
   ```
   python setup.py install
@@ -35,13 +35,13 @@ To install aattggcc code
 Usage
 =====
 
-Run the ``aattggcc --help`` command to see what workflows are available and ``aatttggcc nanopore -help`` to see how to use them.
+Run the ``tallynn --help`` command to see what workflows are available and ``tallynn nanopore -help`` to see how to use them.
 
 
 For example, to generate a configuration file run
 
    ```
-   aattggcc nanopore config
+   tallynn nanopore config
    ```
 
 To set up the configuration file please refer to [read the docs]().
@@ -51,5 +51,5 @@ Then configure your directory as directed by read the docs [set up]().
 To run the pipeline with all tasks then run
    
    ```
-   aattggcc nanopore make full -v5 
+   tallynn nanopore make full -v5 
    ```
