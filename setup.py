@@ -8,7 +8,7 @@ from distutils.version import LooseVersion
 if LooseVersion(setuptools.__version__) < LooseVersion('1.1'):
     print("Version detected:", LooseVersion(setuptools.__version__))
     raise ImportError(
-        "the aattggcc requires setuptools 1.1 higher")
+        "the tallynn requires setuptools 1.1 higher")
 
 ########################################################################
 ########################################################################
@@ -17,7 +17,7 @@ IS_OSX = sys.platform == 'darwin'
 ########################################################################
 ########################################################################
 # collect version
-print(sys.path.insert(0, "scpipelines"))
+print(sys.path.insert(0, "tallynn"))
 import version
 
 version = version.__version__
@@ -31,8 +31,8 @@ major, minor1, minor2, s, tmp = sys.version_info
 if major < 3:
     raise SystemExit("""Requires Python 3 or later.""")
 
-aattggcc_packages = find_packages()
-aattggcc_package_dirs = {'scpipelines': 'scpipelines'}
+tallynn_packages = find_packages()
+tallynn_package_dirs = {'tallynn': 'tallynn'}
 
 ##########################################################
 ##########################################################
@@ -52,23 +52,23 @@ Operating System :: MacOS
 
 setup(
     # package information
-    name='clusthub',
+    name='tallynn',
     version=version,
-    description='aattggcc : long-read single-cell nanopore barcode and UMI correction pipeline',
+    description='tallynn : long-read single-cell nanopore barcode and UMI correction pipeline',
     author='Adam Cribbs',
     author_email='adam.cribbs@ndorms.ox.ac.uk',
     license="MIT",
     platforms=["any"],
     keywords="computational genomics",
-    long_description='''aattggcc : long-read single-cell nanopore barcode and UMI correction pipeline''',
+    long_description='''tallynn : long-read single-cell nanopore barcode and UMI correction pipeline''',
     classifiers=[_f for _f in classifiers.split("\n") if _f],
     url="",
     # package contents
-    packages=aattggcc_packages,
-    package_dir=aattggcc_package_dirs,
+    packages=tallynn_packages,
+    package_dir=tallynn_package_dirs,
     include_package_data=True,
     entry_points={
-        "console_scripts": ["aattggcc = scpipelines.entry:main"]
+        "console_scripts": ["tallynn = scpipelines.entry:main"]
     },
     # other options
     zip_safe=False,
