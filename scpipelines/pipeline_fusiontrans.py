@@ -73,6 +73,7 @@ SEQUENCESUFFIXES = ("*.bam")
 SEQUENCEFILES = tuple([os.path.join(DATADIR, suffix_name)
                        for suffix_name in SEQUENCESUFFIXES])
 
+
 @transform(SEQUENCEFILES,
            regex("data/(\S+).bam"),
            r"\1_SA.bam")
@@ -80,7 +81,7 @@ def make_sabam(infile, outfile):
     ''' Generate a bam file containing all reads listed as
         chimeric'''
 
-    bamfile = pysam.AlignmentFile(infile,"rb")
+    bamfile = pysam.AlignmentFile(infile, "rb")
     split = pysam.AlignmentFile(outfile, "wb", template=bamfile)
 
     for line in bamfile:
@@ -88,7 +89,7 @@ def make_sabam(infile, outfile):
             split.write(line)
         else:
             pass
-    
+
     bamfile.close()
     split.close()
 
@@ -112,9 +113,8 @@ def tabix_bed(infile, outfile):
 def fusion_annotate(infiles, outfile):
     '''Annotate fusion and original gene'''
 
-    
     infile, bed = infiles
-    bed = bed.replace(".tbi","")
+    bed = bed.replace(".tbi", "")
 
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
@@ -130,10 +130,9 @@ def fusion_annotate(infiles, outfile):
 def gene_annotate(infiles, outfile):
     '''Annotate gene and original gene'''
 
-    
     infile, bed = infiles
-    bed = bed.replace(".tbi","")
-    outfile_tmp = outfile +  ".tmp"
+    bed = bed.replace(".tbi", "")
+    outfile_tmp = outfile + ".tmp"
 
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
 
@@ -145,8 +144,8 @@ def gene_annotate(infiles, outfile):
 
 
 @transform(gene_annotate,
-          regex("(\S+)_FinalAnnotate.bam"),
-          [r"\1_fusion1.bed",r"\1_fusion2.bed"])
+           regex("(\S+)_FinalAnnotate.bam"),
+           [r"\1_fusion1.bed", r"\1_fusion2.bed"])
 def generate_bedout(infile, outfiles):
     '''Generate output bed file '''
 
@@ -163,7 +162,7 @@ def generate_bedout(infile, outfiles):
            "_counts.txt")
 def generate_counts(infiles, outfile):
     '''Generate counts for each fusion gene'''
-    
+
     bed1, bed2 = infiles
 
     PYTHON_ROOT = os.path.join(os.path.dirname(__file__), "python/")
@@ -178,7 +177,6 @@ def generate_counts(infiles, outfile):
            "_finalcounts.txt")
 def generate_finalcounts(infile, outfile):
     '''Generate final counts for each fusion gene irrespective of the orientation of the fusion'''
-    
 
     R_ROOT = os.path.join(os.path.dirname(__file__), "R/")
 
@@ -191,6 +189,7 @@ def generate_finalcounts(infile, outfile):
 def full():
     pass
 
+
 def main(argv=None):
     if argv is None:
         argv = sys.argv
@@ -198,4 +197,3 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit(P.main(sys.argv))
-
