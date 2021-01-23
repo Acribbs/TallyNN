@@ -529,7 +529,7 @@ def mapping_gene(infile, outfile):
 
 @transform(mapping_gene,
            regex("final_gene.sam"),
-           r"final_gene_sorted.bam")
+           r"final_gene.bam")
 def run_samtools_gene(infile, outfile):
     '''convert sam to bam and sort'''
 
@@ -541,13 +541,13 @@ def run_samtools_gene(infile, outfile):
 
 
 @transform(run_samtools_gene,
-           regex("final_gene_sorted.bam"),
+           regex("final_gene.bam"),
            r"Aligned_final_gene_sorted.bam")
 def feature_counts(infile, outfile):
     ''' '''
 
     statement = '''featureCounts -a  %(featurecounts_gtf)s -o gene_assigned -R BAM %(infile)s  &&
-                   samtools sort final_gene_sorted.bam.featureCounts.bam -o Aligned_final_gene_sorted.bam &&
+                   samtools sort final_gene.bam.featureCounts.bam -o Aligned_final_gene_sorted.bam &&
                    samtools index Aligned_final_gene_sorted.bam'''
 
     P.run(statement)
