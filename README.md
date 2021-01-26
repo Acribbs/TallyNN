@@ -31,6 +31,10 @@ To install tallynn code
   python setup.py install
   ```
 
+Documentation
+=============
+
+Further information how you can run the pipelines can be found at [read the docs](https://tallynn.readthedocs.io/en/latest/)
 
 Usage
 =====
