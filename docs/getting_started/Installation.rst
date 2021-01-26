@@ -1,48 +1,34 @@
 .. _getting_started-Installation:
 
-
 ============
 Installation
 ============
 
-The following sections describe how to install the scflow framework.
+The following sections describe how to install the TallyNN analysis pipelines.
 
-------------------
-Conda Installation
-------------------
 
-The preferred method for installation is through conda. Currently this installation is still in working progress. Preferably the installation should be in a separate environment.::
+We recommend installing [miniconda](https://docs.conda.io/en/latest/miniconda.html), then creating
+a new environment and install mamba::
 
-  # The conda environment is currently not ready but we are working on this
-  #conda create -n scflow -c cgat scflow
-  #conda activate scflow
-  #scflow --help
 
-----------------
-Pip installation
-----------------
+  conda create -n tallynn
+  conda install mamba -c conda-forge
 
-You can install scflow using pip, this will only install the package without any dependancies, which will have to be installed separately.::
 
-  pip install scflow
+Next install the required software::
 
--------------------
-Manual Installation
--------------------
 
-The repository can also be installed manually, but dependancies will need to be installed separately.::
+  mamba install cgatcore samtools minimap2 subread
 
-  git clone https://github.com/Acribbs/scflow.git
+
+Then, at the moment, you will need to manually install the fork of umi tools::
+
+
+  git clone https://github.com/Acribbs/UMI-tools
   python setup.py install
-  scflow --help
 
------------------------------
-Installing additional software
------------------------------
 
-We always recommend using conda to install additional software where possible.
+To install tallynn code::
 
-This can be easily performed by::
 
-  conda search <package>
-  conda install <package>
+  python setup.py install

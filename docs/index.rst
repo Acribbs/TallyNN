@@ -40,7 +40,6 @@ Support
 
    getting_started/Installation.rst
    getting_started/Cluster_config.rst
-   getting_started/Examples.rst
    getting_started/Tutorial.rst
 
 .. toctree::
@@ -49,9 +48,8 @@ Support
    :maxdepth: 1
    :hidden:
 
-   pipelines/Singlecell.rst
-   pipelines/Singlenuclei.rst
-   pipelines/Velocyto.rst
+   pipelines/nanopore.rst
+   pipelines/illumina.rst
 
 .. toctree::
    :caption: Project Info

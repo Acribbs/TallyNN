@@ -10,7 +10,7 @@ TallyNN is an open-source project and we have made the repository available unde
 MIT License
 -----------
 
-Copyright (c) 2019 cgat-developers
+Copyright (c) 2019 Adam Cribbs
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
