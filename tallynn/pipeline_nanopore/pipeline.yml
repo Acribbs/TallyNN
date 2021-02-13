@@ -39,7 +39,7 @@ whitelist: 3000
 
 # minimap2 mapping options
 minimap2:
-   options: -ax map-ont --MD --sam-hit-only 
+   options: -ax map-ont -p 0.9 --end-bonus 10 -N 3 
 
    fasta_cdna: Homo_sapiens-GRCh38.fa
 
