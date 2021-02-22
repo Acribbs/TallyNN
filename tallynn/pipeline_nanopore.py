@@ -518,11 +518,16 @@ def mapping_gene(infile, outfile):
 
     infile = infile.replace(".fastq.1.gz", ".fastq.2.gz")
 
+    if PARAMS['strip-seq']:
+        strip = "cgat bam2bam --method=strip-sequence -L  %(outfile)s.log <  %(outfile)s.tmp.sam >  %(outfile)s"
+    else:
+        strip = "cp %(outfile)s.tmp.sam %(outfile)s" % locals()
+
     dna = PARAMS['minimap2_fasta_genome']
     junc_bed = PARAMS['minimap2_junc_bed']
 
     statement = '''minimap2 -ax splice -k 14 -uf --MD --sam-hit-only --secondary=no %(junc_bed)s %(dna)s %(infile)s > %(outfile)s.tmp.sam 2> %(outfile)s.log &&
-                   cgat bam2bam --method=strip-sequence -L  %(outfile)s.log <  %(outfile)s.tmp.sam >  %(outfile)s'''
+                   %(strip)s'''
 
     P.run(statement)
 
