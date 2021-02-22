@@ -37,6 +37,9 @@ distance: 4
 # Numbers of cells for whitelist
 whitelist: 3000
 
+# To speed up the gene analysis you can strip sequence by specifying 1
+strip-seq: 1
+
 # minimap2 mapping options
 minimap2:
    options: -ax map-ont -p 0.9 --end-bonus 10 -N 3 
