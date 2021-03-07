@@ -35,19 +35,16 @@ Activate the condda environment
   conda activate tallynn
   ```
 
-Then, you will need to manually install the fork of umi tools. The fork is added as a submodule to this
+Then, you will need to manually install TallyNN and the fork of umi tools. The fork is added as a submodule to this
 repo to help you easily install.
 
   ```
   # Clone the TallyNN repo
   git clone https://github.com/Acribbs/TallyNN.git
-  cd TallyNN/UMI-tools
+  # Install TallyNN code
   python setup.py install
-  ```
-  
-Lastsly, you will next need to install tallynn code
-
-  ```
+  # Next install UMI-tools fork to allow doublet demultiplexing
+  cd TallyNN/UMI-tools
   python setup.py install
   ```
 
