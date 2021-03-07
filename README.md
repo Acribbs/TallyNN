@@ -20,24 +20,30 @@ We reccomend installing [miniconda](https://docs.conda.io/en/latest/miniconda.ht
 a new environment and install mamba
 
   ```
-  conda create -n tallynn
   conda install mamba -c conda-forge
   ```
   
-Next install the required software
+Next install the required software using the conda yml file 
 
   ```
-  mamba install cgatcore samtools minimap2 subread
+  mamba env update --file conda/environments/tallynn.yml
   ```
 
-Then, at the moment, you will need to manually install the fork of umi tools
+Activate the condda environment
 
   ```
-  git clone https://github.com/Acribbs/UMI-tools
+  conda activate tallynn
+  ```
+
+Then, you will need to manually install the fork of umi tools. The fork is added as a submodule to this
+repo to help you easily install.
+
+  ```
+  cd UMI-tools
   python setup.py install
   ```
   
-To install tallynn code
+Lastsly, you will next need to install tallynn code
 
   ```
   python setup.py install
@@ -60,9 +66,7 @@ For example, to generate a configuration file run
    tallynn nanopore config
    ```
 
-To set up the configuration file please refer to [read the docs]().
-
-Then configure your directory as directed by read the docs [set up]().
+To set up the configuration file please refer to [read the docs](https://tallynn.readthedocs.io/en/latest/getting_started/Tutorial.html#modify-the-config-file).
 
 To run the pipeline with all tasks then run
    
