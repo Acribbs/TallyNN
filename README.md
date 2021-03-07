@@ -39,7 +39,9 @@ Then, you will need to manually install the fork of umi tools. The fork is added
 repo to help you easily install.
 
   ```
-  cd UMI-tools
+  # Clone the TallyNN repo
+  git clone https://github.com/Acribbs/TallyNN.git
+  cd TallyNN/UMI-tools
   python setup.py install
   ```
   
