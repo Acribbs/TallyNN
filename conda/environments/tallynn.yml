@@ -11,3 +11,4 @@ dependencies:
 - samtools
 - minimap2
 - subread
+- nose
