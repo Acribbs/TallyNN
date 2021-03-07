@@ -68,7 +68,7 @@ setup(
     package_dir=tallynn_package_dirs,
     include_package_data=True,
     entry_points={
-        "console_scripts": ["tallynn = scpipelines.entry:main"]
+        "console_scripts": ["tallynn = tallynn.entry:main"]
     },
     # other options
     zip_safe=False,
