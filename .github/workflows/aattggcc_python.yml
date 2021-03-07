@@ -36,8 +36,8 @@ jobs:
           channels: conda-forge, bioconda, defaults
           channel-priority: true
           activate-environment: cgat-core
-          environment-file: conda/environments/aattggcc_python.yml
-      - name:
+          environment-file: conda/environments/tallynn.yml
+      - name: Install UMI-tools
         run: |
           git clone https://github.com/Acribbs/UMI-tools.git
           python UMI-tools/setup.py install

@@ -1,0 +1,13 @@
+name: tallynn
+
+channels:
+- conda-forge
+- bioconda
+- defaults
+
+dependencies:
+- python
+- cgatcore
+- samtools
+- minimap2
+- subread
