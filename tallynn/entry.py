@@ -22,7 +22,7 @@ import sys
 import re
 import glob
 import imp
-import scpipelines
+import tallynn
 
 
 def printListInColumns(l, ncolumns):
@@ -61,7 +61,7 @@ def main(argv=None):
 
     # paths to look for pipelines:
     #print(pipelines.__file__)
-    path = os.path.abspath(os.path.dirname(scpipelines.__file__))
+    path = os.path.abspath(os.path.dirname(tallynn.__file__))
     relpath = os.path.abspath("../src")
 
     paths = [path, relpath]
