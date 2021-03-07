@@ -40,7 +40,8 @@ jobs:
       - name: Install UMI-tools
         run: |
           git clone https://github.com/Acribbs/UMI-tools.git
-          python UMI-tools/setup.py install
+          cd UMI-tools
+          python setup.py install
       - name: Show conda
         run: |
           conda info
