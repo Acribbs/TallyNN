@@ -12,3 +12,4 @@ dependencies:
 - minimap2
 - subread
 - nose
+- pep8
