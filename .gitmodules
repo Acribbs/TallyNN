@@ -1,0 +1,3 @@
+[submodule "UMI-tools"]
+	path = UMI-tools
+	url = https://github.com/Acribbs/UMI-tools.git
