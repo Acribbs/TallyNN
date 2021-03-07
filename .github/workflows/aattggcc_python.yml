@@ -4,14 +4,14 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: Ex1 (${{ matrix.python-version }}, ${{ matrix.os }})
+    name: TallyNN (${{ matrix.python-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macos-latest"]
-        python-version: ["3.7", "3.8"]
+        os: ["ubuntu-latest"]
+        python-version: ["3.7", "3.8", "3.9"]
 
     defaults:
       run:
