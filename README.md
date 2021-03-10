@@ -2,7 +2,7 @@
 <img src="img/Nanopore-workflow.png" height=300>
 
 
-[![cellhub](https://github.com/Acribbs/TallyNN/actions/workflows/aattggcc_python.yml/badge.svg)](https://github.com/Acribbs/TallyNN/actions/workflows/aattggcc_python.yml) 
+[![tallynn](https://github.com/Acribbs/TallyNN/actions/workflows/tallynn_python.yml/badge.svg)](https://github.com/Acribbs/TallyNN/actions/workflows/tallynn_python.yml)
 [![Documentation Status](https://readthedocs.org/projects/tallynn/badge/?version=latest)](https://tallynn.readthedocs.io/en/latest/?badge=latest)
       
 
