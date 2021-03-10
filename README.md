@@ -1,6 +1,6 @@
 
 <img src="img/Nanopore-workflow.png" height=300>
-
+[![cellhub](https://github.com/Acribbs/TallyNN/actions/workflows/aattggcc_python.yml/badge.svg)](https://github.com/Acribbs/TallyNN/actions/workflows/aattggcc_python.yml)
 
 
 Overview
@@ -81,3 +81,10 @@ To run the pipeline with all tasks then run
    ```
    tallynn nanopore make full -v5 
    ```
+
+Manuscript
+==========
+
+The bioRxiv manuscript accompanying this code can be found here: 
+
+[Highly accurate barcode and UMI error correction using dual nucleotide dimer blocks allows direct single-cell nanopore transcriptome sequencing. Martin Philpott, Jonathan Watson, Anjan Thakurta, Tom Brown Jr, Tom Brown Sr, Udo Oppermann, Adam P Cribbs. 2021](https://www.biorxiv.org/content/10.1101/2021.01.18.427145v1)
