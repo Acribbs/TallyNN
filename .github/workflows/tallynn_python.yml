@@ -1,4 +1,4 @@
-name: cellhub
+name: tallynn
 
 on: [push, pull_request]
 
