@@ -12,6 +12,15 @@ TallyNN is a collection of single-cell workflows that allow users to perform bar
 for oligonucleotide sequences that are synthesised using double phosphoramidites for droplet based
 single-cell sequencing.
 
+Workflows
+=========
+
+Included within this repo are three workflows:
+
+* pipeline_nanopore - a workflow that facilitates the analysis of nanopore single-cell sequencing data. 
+* pipeline_illumina - this is a workflow that processes dinucleotide block single-celdata that has been illumina sequenced. The workflow takes as an input a fastq file and collapses barcode and UMI so that users can procedd their sequencing data using kallisto bustools.
+* pipeline_fusiontrans - this pipeline processes nanopore sequencing data and detects the presence of fusion transcripts.  
+
 
 Installation
 ============
