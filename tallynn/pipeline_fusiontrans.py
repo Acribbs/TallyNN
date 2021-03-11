@@ -1,3 +1,26 @@
+##############################################################################
+#
+#   Botnar Resaerch Centre
+#
+#   $Id$
+#
+#   Copyright (C) 2020 Adam Cribbs
+#
+#   This program is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU General Public License
+#   as published by the Free Software Foundation; either version 2
+#   of the License, or (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+###############################################################################
+
 """
 ====================
 Pipeline fusiontrans
@@ -7,27 +30,49 @@ Pipeline fusiontrans
 Overview
 ==================
 
-The pipeline takes as an input a bam file that was ran using featurecounts from pipeline_nanopore.py and generates a bed file of
+The pipeline takes as an input a bam file that was ran using featurecounts
+from pipeline_nanopore.py and generates a bed file of
 fusion transcripts.
 
 Usage
 =====
 
+To generate the config file to change the running of the pipeline you need to
+run:
+
+tallynn fusiontrans config
+
+This will generate a pipeline.yml file that the user can modify to change the
+output of the pipeline. Once the user has modified the pipeline.yml file the
+pipeline can then be ran using the following commandline command:
+
+tallynn fusiontrans make full -v5
+
+You can run the pipeline locally (without a cluster) using --local
+
+tallynn fusiontrans make full -v5 --local
+
+
 Configuration
 -------------
 
-The pipeline uses CGAT-core and CGAT-apps throughout the pipeline. Please see installation
-and setup and installation instructions at `cgat-core documentation <>`_
-
+The pipeline uses CGAT-core as the pipeline language. Please see the
+docuemntation for how to install tallynn.
 
 Input files
 -----------
 
+The input for this pipeline is the final_gene.bam file generated from
+running pipeline_nanopore.py.
 
+The second input file is a bed file of the coding regions.
 
 Pipeline output
 ==================
 
+The output of the workflow is the generation of:
+* bed file regions for fusion1 and fusion2.
+* counts matrix of the identified fusion transcripts
 
 Code
 ==================
