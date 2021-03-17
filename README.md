@@ -56,7 +56,7 @@ repo to help you easily install.
   git clone https://github.com/Acribbs/TallyNN.git
   # Install TallyNN code
   python setup.py install
-  # Next install UMI-tools fork to allow doublet demultiplexing
+  # Next install UMI-tools fork to allow doublet deduplication
   cd TallyNN/UMI-tools
   python setup.py install
   ```
