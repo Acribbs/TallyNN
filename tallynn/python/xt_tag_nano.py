@@ -37,7 +37,12 @@ samfile = pysam.AlignmentFile(args.infile, "rb")
 outfile = pysam.AlignmentFile(args.outfile, "wb", template=samfile)
 
 for read in samfile:
-    read.tags += [('XT',read.reference_name)]
+
+    if read.reference_name is not None:
+        read.tags += [('XT',read.reference_name)]
+    
+    else:
+        pass
 
     outfile.write(read)
 

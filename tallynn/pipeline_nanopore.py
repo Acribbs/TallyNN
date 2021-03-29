@@ -549,9 +549,10 @@ def mapping_gene(infile, outfile):
     '''Run minimap2 to map the fastq files to the genome for gene level analysis'''
 
     infile = infile.replace(".fastq.1.gz", ".fastq.2.gz")
+    outfile = outfile
 
     if PARAMS['strip-seq']:
-        strip = "cgat bam2bam --method=strip-sequence -L  %(outfile)s.log <  %(outfile)s.tmp.sam >  %(outfile)s"
+        strip = "cgat bam2bam --method=strip-sequence -L  %(outfile)s.log <  %(outfile)s.tmp.sam >  %(outfile)s" % locals()
     else:
         strip = "cp %(outfile)s.tmp.sam %(outfile)s" % locals()
 

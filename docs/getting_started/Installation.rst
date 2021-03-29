@@ -24,7 +24,7 @@ a new environment and install mamba::
 Next install the required software::
 
 
-  mamba install cgatcore samtools minimap2 subread python-levenshtein
+  mamba env upate conda/environment/tallynn.yml
 
 
 Then, at the moment, you will need to manually install the fork of umi tools.
@@ -32,6 +32,7 @@ The fork is provided as a submodule within TallyNN. You can install it as follow
 
 
   cd tallynn/UMI-tools
+  git checkout AC-dualoligo
   python setup.py install
 
 
