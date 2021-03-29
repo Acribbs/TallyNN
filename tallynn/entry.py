@@ -6,15 +6,15 @@ aattggcc.py - Single Cell analysis workflows for nanopore seq
 
 To use a specific workflow, type::
 
-    aattggcc <workflow> [workflow options] [workflow arguments]
+    tallynn <workflow> [workflow options] [workflow arguments]
 
 For this message and a list of available keywords type::
 
-    aattggcc --help
+    tallynn --help
 
 To get help for a specify workflow, type::
 
-    aattggcc <workflow> --help
+    tallynn <workflow> --help
 '''
 
 import os
