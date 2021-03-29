@@ -31,7 +31,7 @@ Then, at the moment, you will need to manually install the fork of umi tools.
 The fork is provided as a submodule within TallyNN. You can install it as follows::
 
 
-  cd tallynn/UMI-tools
+  git clone https://github.com/Acribbs/UMI-tools.git
   git checkout AC-dualoligo
   python setup.py install
 
