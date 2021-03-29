@@ -13,5 +13,5 @@ dependencies:
 - subread
 - nose
 - pep8
-- pysam=15.2
+- pysam=0.15.2
 - python-levenshtein
