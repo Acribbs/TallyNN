@@ -24,7 +24,7 @@ a new environment and install mamba::
 Next install the required software::
 
 
-  mamba install cgatcore samtools minimap2 subread
+  mamba install cgatcore samtools minimap2 subread python-levenshtein
 
 
 Then, at the moment, you will need to manually install the fork of umi tools.

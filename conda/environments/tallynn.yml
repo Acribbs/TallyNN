@@ -6,10 +6,12 @@ channels:
 - defaults
 
 dependencies:
-- python
+- python > 3.6
 - cgatcore
 - samtools
 - minimap2
 - subread
 - nose
 - pep8
+- pysam=15.2
+- python-levenshtein
