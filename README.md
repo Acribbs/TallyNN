@@ -21,8 +21,8 @@ Workflows
 
 Included within this repo are three workflows:
 
-* pipeline_nanopore - a workflow that facilitates the analysis of nanopore single-cell sequencing data. 
-* pipeline_illumina - this is a workflow that processes dinucleotide block single-celdata that has been illumina sequenced. The workflow takes as an input a fastq file and collapses barcode and UMI so that users can procedd their sequencing data using kallisto bustools.
+* pipeline_nanopore - a workflow that facilitates the analysis of scBUC-seq nanopore single-cell sequencing data. 
+* pipeline_illumina - this is a workflow that processes scBUC-seq dinucleotide block single-cell data that has been illumina sequenced. The workflow takes as an input a fastq file and collapses barcode and UMI so that users can procedd their sequencing data using kallisto bustools.
 * pipeline_fusiontrans - this pipeline processes nanopore sequencing data and detects the presence of fusion transcripts.  
 
 
@@ -56,7 +56,7 @@ repo to help you easily install.
   git clone https://github.com/Acribbs/TallyNN.git
   # Install TallyNN code
   python setup.py install
-  # Next install UMI-tools fork to allow doublet demultiplexing
+  # Next install UMI-tools fork to allow doublet deduplication
   cd TallyNN/UMI-tools
   python setup.py install
   ```
