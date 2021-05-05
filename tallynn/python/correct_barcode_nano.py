@@ -78,8 +78,18 @@ with pysam.FastxFile(args.read1) as fh, pysam.FastxFile(args.read2) as fh2:
 
         b = min(barcode_list, key=barcode_list.get)
 
-        outf.write("@%s\n%s\n+\n%s\n" % (record_fh.name, b, record_fh.quality))
-        outf2.write("@%s\n%s\n+\n%s\n" % (record_fh2.name, record_fh2.sequence, record_fh2.quality))
+        res = True
+        test_value = list(barcode_list.values())[0]
+
+        for ele in barcode_list:
+            if barcode_list[ele] != test_value:
+                res = False
+
+        if res is True:
+            pass
+        else:
+            outf.write("@%s\n%s\n+\n%s\n" % (record_fh.name, b, record_fh.quality))
+            outf2.write("@%s\n%s\n+\n%s\n" % (record_fh2.name, record_fh2.sequence, record_fh2.quality))
 
 
 log.write("The number of total reads with levenshtein distance less than %s: %s\n" %(args.distance, n))
