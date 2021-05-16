@@ -558,8 +558,9 @@ def mapping_gene(infile, outfile):
 
     dna = PARAMS['minimap2_fasta_genome']
     junc_bed = PARAMS['minimap2_junc_bed']
+    options = PARAMS['minimap2_gene_options']
 
-    statement = '''minimap2 -ax splice -k 14 -uf --MD --sam-hit-only --secondary=no %(junc_bed)s %(dna)s %(infile)s > %(outfile)s.tmp.sam 2> %(outfile)s.log &&
+    statement = '''minimap2 -ax splice %(options)s -k 14 -uf --sam-hit-only --secondary=no %(junc_bed)s %(dna)s %(infile)s > %(outfile)s.tmp.sam 2> %(outfile)s.log &&
                    %(strip)s'''
 
     P.run(statement,

@@ -50,6 +50,8 @@ minimap2:
 
    junc_bed: --junc-bed /ifs/research-groups/botnar/proj034/analyses/nanopore_E3-Mix/data/Homo_sapiens.GRCh38.101.bed
 
+   gene_options: ''
+
 featurecounts:
 
    gtf: /ifs/research-groups/botnar/proj034/analyses/nanopore_E3-Mix/data/Homo_sapiens.GRCh38.101.gtf
