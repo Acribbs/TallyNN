@@ -562,7 +562,8 @@ def mapping_gene(infile, outfile):
     statement = '''minimap2 -ax splice -k 14 -uf --MD --sam-hit-only --secondary=no %(junc_bed)s %(dna)s %(infile)s > %(outfile)s.tmp.sam 2> %(outfile)s.log &&
                    %(strip)s'''
 
-    P.run(statement)
+    P.run(statement,
+          job_memory="40G")
 
 
 @transform(mapping_gene,
