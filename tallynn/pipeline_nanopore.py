@@ -397,7 +397,7 @@ def mapping(infile, outfile):
 def run_samtools(infile, outfile):
     '''convert sam to bam and sort -F 272'''
 
-    statement = '''samtools view -bS -m 2G %(infile)s > final.bam &&
+    statement = '''samtools view -bS %(infile)s > final.bam &&
                    samtools sort final.bam -o final_sorted.bam &&
                    samtools index final_sorted.bam'''
 
