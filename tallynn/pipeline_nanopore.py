@@ -573,7 +573,7 @@ def mapping_gene(infile, outfile):
 def run_samtools_gene(infile, outfile):
     '''convert sam to bam and sort'''
 
-    statement = '''samtools view -bh -m 2G %(infile)s > final_gene.bam &&
+    statement = '''samtools view -bh  %(infile)s > final_gene.bam &&
                    samtools sort final_gene.bam -o final_gene_sorted.bam &&
                    samtools index final_gene_sorted.bam'''
 
