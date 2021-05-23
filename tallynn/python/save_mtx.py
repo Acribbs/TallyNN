@@ -85,7 +85,7 @@ def save_mtx(data, destination, cell_names=None, gene_names=None):
 
 
 infile = pd.read_table(args.data, sep="\t", header=0)
-infile = infile[infile['count'] > 5]
+infile = infile[infile['count'] > 0]
 
 infile = infile.pivot(index='cell', columns='gene', values='count')
 infile.fillna(0, inplace=True)
