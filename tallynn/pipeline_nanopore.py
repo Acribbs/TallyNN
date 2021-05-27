@@ -536,7 +536,7 @@ def convert_tomtx_unambiguous(infile, outfile):
 
     statement = '''python %(PYTHON_ROOT)s/save_mtx.py --data=%(infile)s --dir=mtx_unambiguous.dir/'''
 
-    P.run(statement)
+    P.run(statement, job_memory="20G")
 
 
 ###############################################################################
