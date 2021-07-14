@@ -16,3 +16,4 @@ dependencies:
 - pep8
 - pysam=0.15.2
 - python-levenshtein
+- regex
