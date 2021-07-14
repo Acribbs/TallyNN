@@ -617,7 +617,7 @@ def convert_tomtx_genes(infile, outfile):
     P.run(statement)
 
 
-@follows(convert_tomtx, convert_tomtx_unambiguous, convert_tomtx_genes)
+@follows(convert_tomtx, convert_tomtx_genes)
 def full():
     pass
 
