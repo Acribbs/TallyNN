@@ -12,7 +12,7 @@ import argparse
 # ########################################################################### #
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-L = logging.getLogger("complement_ployA.py")
+L = logging.getLogger("tso_umi.py")
 
 # ########################################################################### #
 # ######################## Parse the arguments ############################## #
@@ -35,39 +35,19 @@ print(args)
 # ######################## Code                ############################## #
 # ########################################################################### #
 
+samfile = pysam.AlignmentFile(args.infile, "rb")
+outfile = pysam.AlignmentFile(args.outname, "wb", template=samfile)
 
-tab = str.maketrans("ACTG", "TGAC")
+for read in samfile:
 
-def reverse_complement_table(seq):
-    return seq.translate(tab)[::-1]
-
-
-outfile = open(args.outname, "w")
-log =  iotools.open_file(args.outname + ".log","w")
-n = 0
-y = 0
-with pysam.FastxFile(args.infile) as fh:
+    if read.reference_name is not None:
+        read.tags += [('XT',read.reference_name)]
     
-    for record in fh:
-        y +=1
-        seq = record.sequence[0:100]
-        m=regex.findall("(TTTTTTTTTTTTTTTTTTTT){e<=3}", str(seq))
-        if m:
-            n +=1
-            outfile.write("@%s\n%s\n+\n%s\n" % (record.name, record.sequence, record.quality))
-        else:
-            seq = record.sequence[-100:]
-            m=regex.findall("(AAAAAAAAAAAAAAAAA){e<=3}", str(seq))
-            if m:
-                n +=1
-                sequence = reverse_complement_table(str(record.sequence))
-                outfile.write("@%s\n%s\n+\n%s\n" % (record.name, sequence, record.quality))
+    else:
+        pass
 
-        
+    outfile.write(read)
 
-log.write("The number of total reads with polyA: %s\n" %(n))
-log.write("The number of total reads is: %s\n" %(y))
-log.write("The number of total recovered percent is: %s\n" %((n/y)*100))
-
-log.close()
+samfile.close()
 outfile.close()
+

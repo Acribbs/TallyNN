@@ -4,7 +4,7 @@ import cgatcore.iotools as iotools
 import pysam
 import logging
 import argparse
-
+import collections
 
 
 # ########################################################################### #
@@ -12,7 +12,7 @@ import argparse
 # ########################################################################### #
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
-L = logging.getLogger("complement_ployA.py")
+L = logging.getLogger("polya_umi.py")
 
 # ########################################################################### #
 # ######################## Parse the arguments ############################## #
@@ -35,39 +35,33 @@ print(args)
 # ######################## Code                ############################## #
 # ########################################################################### #
 
-
-tab = str.maketrans("ACTG", "TGAC")
-
-def reverse_complement_table(seq):
-    return seq.translate(tab)[::-1]
-
-
-outfile = open(args.outname, "w")
+outfile = iotools.open_file(args.outname, "w")
 log =  iotools.open_file(args.outname + ".log","w")
+
 n = 0
 y = 0
 with pysam.FastxFile(args.infile) as fh:
     
     for record in fh:
-        y +=1
-        seq = record.sequence[0:100]
-        m=regex.findall("(TTTTTTTTTTTTTTTTTTTT){e<=3}", str(seq))
-        if m:
-            n +=1
-            outfile.write("@%s\n%s\n+\n%s\n" % (record.name, record.sequence, record.quality))
-        else:
-            seq = record.sequence[-100:]
-            m=regex.findall("(AAAAAAAAAAAAAAAAA){e<=3}", str(seq))
-            if m:
-                n +=1
-                sequence = reverse_complement_table(str(record.sequence))
-                outfile.write("@%s\n%s\n+\n%s\n" % (record.name, sequence, record.quality))
-
+        n += 1
+        seq_nano = record.sequence
         
+        
+        m=regex.finditer("(GTACTCTGCGTT){e<=0}", str(record.sequence))
+        
+        for i in m:
+            barcode = seq_nano[i.start()-12:i.start()]
+            record_new = record.name + "_" + str(barcode)
 
-log.write("The number of total reads with polyA: %s\n" %(n))
-log.write("The number of total reads is: %s\n" %(y))
-log.write("The number of total recovered percent is: %s\n" %((n/y)*100))
+            if len(barcode) == 12:
+                y += 1
+                outfile.write("@%s\n%s\n+\n%s\n" % (record_new, record.sequence, record.quality))
+            else:
+                pass
+
+log.write("The number of total reads: %s\n" %(n))
+log.write("The number of total reads with a polyA UMI: %s\n" %(y))
+log.write("The number of total recovered percent is: %s\n" %((y/n)*100))
 
 log.close()
 outfile.close()

@@ -77,7 +77,7 @@ with pysam.FastxFile(args.infile) as fh:
             new_seq = seq_nano[i.end():]
             new_seq_quality = record.quality[i.end():]
             
-            m=regex.finditer("(TTTTTTTTTTTTTTTTTTTT){e<=3}", str(seq_nano))
+            m=regex.finditer("(TTTTTTTTTTTTTTTTT){e<=3}", str(seq_nano))
             for i in m:
                 read2_seq = seq_nano[i.start():]
                 read2_seq_quality = record.quality[i.start():]

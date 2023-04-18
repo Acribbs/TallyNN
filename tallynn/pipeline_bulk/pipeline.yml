@@ -1,0 +1,37 @@
+# Config file for pipeline_count.py
+
+## general options
+
+# Copyright statement
+copyright: cribbslab (2021)
+
+cdna_fasta: Homo_sapiens.GRCh38.cdna.all.fa
+
+genome_fasta: hg38.fa
+ 
+junc_bed: hg38_geneset_all.bed
+
+gtf: hg38_geneset_all.gtf
+
+# Specify if the pipeline should run umi correction or not
+correct: 1
+
+# Specify if the pipeline should run with a trimer UMI on the tso
+tso_present: 1
+
+# Specify if a split prefix of index is needed for running minimap2 if the index is large
+minimap2_splitprefix: 0
+
+# Threshold to remove UMI errors
+error_removal: 1
+
+# mclumi options
+
+mclumi:
+
+  editdistance: 9
+
+  memory: 100G
+
+
+job_options: -t 48:00:00
