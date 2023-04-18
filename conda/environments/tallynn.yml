@@ -17,3 +17,4 @@ dependencies:
 - pysam=0.15.2
 - python-levenshtein
 - regex
+- click
