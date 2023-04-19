@@ -74,7 +74,7 @@ def count(inbam, tag, output, sep = "_"):
         for i, r in enumerate(bf):
             if r.has_tag(tag) is True:
                 key = (r.get_tag(tag), 'fake_bc')
-                tab.setdefault(key,[]).append(r.qname.split(sep)[2])
+                tab.setdefault(key,[]).append(r.qname.split(sep)[1])
                 n_tag += 1
             else:
                 pass
