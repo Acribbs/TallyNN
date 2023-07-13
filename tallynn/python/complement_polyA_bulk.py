@@ -60,7 +60,7 @@ with pysam.FastxFile(args.infile) as fh:
             m=regex.findall("(TTTTTTTTTTTTTTTTTTTT){e<=3}", str(seq))
             if m:
                 n +=1
-                sequence = reverse_complement_table(str(record.sequence))
+                sequence = str(record.sequence)[::-1]
                 outfile.write("@%s\n%s\n+\n%s\n" % (record.name, sequence, record.quality))
 
         
